@@ -44,6 +44,15 @@ touching planning, correlation, risk or reporting.
 
 See `docs/assessment/` for the full ecosystem assessment and license matrix.
 
+## Try it against a vulnerable app
+
+```bash
+python examples/run_demo.py                  # scans a bundled vulnerable target, offline
+python examples/run_demo.py --confirmed-only # only validated/corroborated findings
+```
+Or point it at your own local target: `vantage scan http://127.0.0.1:3000/ --authorize`.
+See `docs/demo.md` (covers OWASP Juice Shop / DVWA too).
+
 ## Quick start
 
 ```bash

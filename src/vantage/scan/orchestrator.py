@@ -25,6 +25,7 @@ from vantage.domain import (
     Observation,
     Scan,
     ScanState,
+    StageKind,
     Target,
     UnifiedFinding,
     utcnow,
@@ -38,8 +39,40 @@ from vantage.knowledge.base import RequestKnowledgeBase, coverage_key
 from vantage.persistence.repositories import Database
 from vantage.planner.planner import PlannerConfig, ScanPlanner
 from vantage.scan.validation import Prober, ValidationEngine
+from vantage.scope.engine import ScopeEngine
 
 logger = logging.getLogger("vantage.orchestrator")
+
+# Bounds for the discovery -> audit feedback loop (keep traffic sane).
+MAX_DISCOVERED = 60
+MAX_FED_SEEDS = 40
+
+
+def _collect_discovered(
+    observations: list[Observation], scope: ScopeEngine, into: list[str], cap: int
+) -> None:
+    seen = set(into)
+    for obs in observations:
+        for ev in obs.evidence:
+            url = ev.data.get("url") if isinstance(ev.data, dict) else None
+            if isinstance(url, str) and url not in seen and scope.allows(url):
+                into.append(url)
+                seen.add(url)
+                if len(into) >= cap:
+                    return
+
+
+def _merge_seeds(seeds: list[str], discovered: list[str], cap: int) -> list[str]:
+    out = list(seeds)
+    seen = set(seeds)
+    for url in discovered:
+        if url not in seen:
+            out.append(url)
+            seen.add(url)
+        if len(out) >= cap:
+            break
+    return out
+
 
 # Legal scan-state transitions. Guards against illegal jumps and double-runs.
 _TRANSITIONS: dict[ScanState, set[ScanState]] = {
@@ -153,6 +186,11 @@ class Orchestrator:
         all_obs: list[Observation] = []
         engines_run: list[str] = []
         engines_failed: list[str] = []
+        # Engine feedback loop: URLs discovered by earlier (crawl/discovery)
+        # stages are fed to later (audit) stages, so header/secret/template
+        # engines also test endpoints the crawler found, not just the seeds.
+        scope = ScopeEngine(target)
+        discovered: list[str] = []
 
         for stage in plan.stages:
             for task in stage.tasks:
@@ -161,11 +199,13 @@ class Orchestrator:
                     engines_failed.append(task.engine_id)
                     logger.warning("no bound adapter for engine %s", task.engine_id)
                     continue
-                obs = await self._run_engine(
-                    scan, target, adapter, task.capabilities, task.seed_urls, kb
-                )
+                seeds = task.seed_urls
+                if stage.kind is StageKind.AUDIT and discovered:
+                    seeds = _merge_seeds(task.seed_urls, discovered, MAX_FED_SEEDS)
+                obs = await self._run_engine(scan, target, adapter, task.capabilities, seeds, kb)
                 engines_run.append(task.engine_id)
                 all_obs.extend(obs)
+                _collect_discovered(obs, scope, discovered, MAX_DISCOVERED)
 
         if all_obs:
             with self._db.unit_of_work() as uow:
