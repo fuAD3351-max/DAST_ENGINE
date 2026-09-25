@@ -48,6 +48,11 @@ class ContainerSpec:
     output_dir: str = "/out"
     workdir: str = "/work"
     user: str = "65532:65532"
+    binary: str | None = None
+    # Local-execution name of the tool (e.g. "nuclei"). Used by the
+    # LocalSubprocessRunner on hosts (Kali) where the engine is installed as a
+    # native binary. ``args`` may reference the tokens ``/out`` and ``/work``,
+    # which the local runner rewrites to real temp directories.
 
 
 @dataclass(frozen=True)

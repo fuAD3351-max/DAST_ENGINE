@@ -181,3 +181,49 @@ def _sandbox_files(files: dict[str, bytes]) -> SandboxResult:
 
 
 pytestmark = pytest.mark.asyncio
+
+
+async def test_local_subprocess_runner_runs_binary() -> None:
+    from sentinel.domain import NetworkMode, ResourceLimits
+    from sentinel.engines.adapter import ContainerSpec
+    from sentinel.engines.sandbox import LocalSubprocessRunner
+
+    runner = LocalSubprocessRunner()
+    assert await runner.available()
+    spec = ContainerSpec(
+        image="",
+        args=["sentinel-local-test"],
+        network=NetworkMode.NONE,
+        limits=ResourceLimits(timeout_seconds=10),
+        binary="echo",
+    )
+    result = await runner.run(spec)
+    assert result.exit_code == 0
+    assert b"sentinel-local-test" in result.stdout
+
+
+async def test_local_subprocess_runner_missing_binary() -> None:
+    from sentinel.domain import NetworkMode, ResourceLimits
+    from sentinel.engines.adapter import ContainerSpec
+    from sentinel.engines.sandbox import LocalSubprocessRunner
+
+    spec = ContainerSpec(
+        image="",
+        args=[],
+        network=NetworkMode.NONE,
+        limits=ResourceLimits(),
+        binary="sentinel-nonexistent-binary-xyz",
+    )
+    result = await LocalSubprocessRunner().run(spec)
+    assert result.exit_code == 127
+    assert b"not found" in result.stderr
+
+
+async def test_detect_engines_reports_known_set() -> None:
+    from sentinel.engines.detect import detect_engines
+
+    dets = await detect_engines(["nuclei", "ffuf"])
+    ids = {d.engine_id for d in dets}
+    assert ids == {"nuclei", "ffuf"}
+    # In this container the tools are absent; detection must not raise.
+    assert all(d.installed in (True, False) for d in dets)

@@ -46,6 +46,7 @@ class NucleiAdapter(ContainerEngineAdapter):
         Capability.FINGERPRINT_TECH,
     ]
     image = "ghcr.io/projectdiscovery/nuclei"
+    binary = "nuclei"
 
     async def prepare_target(self, request: EngineRunRequest) -> PreparedRun:
         args = ["-jsonl", "-silent", "-no-color", "-duc"]

@@ -44,6 +44,7 @@ class ContainerEngineAdapter(EngineAdapter):
     license_spdx: str
     engine_capabilities: ClassVar[list[Capability]] = []
     image: str = ""
+    binary: str = ""  # local executable name for LocalSubprocessRunner (Kali/host)
 
     def __init__(
         self,
@@ -95,6 +96,7 @@ class ContainerEngineAdapter(EngineAdapter):
             network=self._network_mode(),
             limits=self._limits,
             env=env or {},
+            binary=self.binary or None,
         )
 
     def _guard_output(self, result: SandboxResult | None) -> str:

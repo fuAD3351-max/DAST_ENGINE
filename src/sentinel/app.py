@@ -75,6 +75,7 @@ class SentinelApp:
         manifests_dir: str | Path = DEFAULT_MANIFESTS,
         lock_path: str | Path = DEFAULT_LOCK,
         sandbox: SandboxRunner | None = None,
+        sandbox_mode: str = "auto",
         bind_oss: bool = True,
         validate_findings: bool = True,
     ) -> SentinelApp:
@@ -82,7 +83,7 @@ class SentinelApp:
 
         policy = LicensePolicy.load(policy_path)
         registry = EngineRegistry.load(manifests_dir, lock_path, policy)
-        runner = sandbox or select_runner()
+        runner = sandbox or select_runner(sandbox_mode)
 
         # Bind native (first-party) adapters.
         native = [

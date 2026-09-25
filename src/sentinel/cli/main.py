@@ -147,6 +147,60 @@ def engine_list(
     typer.echo(f"\n{len(engines)} engines; {len(reg.enabled_engines())} usable.")
 
 
+@engine_app.command("detect")
+def engine_detect(
+    lock: Annotated[str, typer.Option()] = DEFAULT_LOCK,
+    json_out: Annotated[bool, typer.Option("--json")] = False,
+) -> None:
+    """Detect engine binaries installed on this host (Kali/Linux).
+
+    Reports which engines are installed on PATH and their versions, and whether
+    the version matches the pinned engine-lock.
+    """
+    import yaml
+
+    from sentinel.engines.detect import detect_engines
+
+    locked: dict[str, str] = {}
+    lock_path = Path(lock)
+    if lock_path.exists():
+        data = yaml.safe_load(lock_path.read_text()) or {}
+        locked = {k: v.get("version", "") for k, v in data.get("engines", {}).items()}
+
+    detections = asyncio.run(detect_engines(locked_versions=locked))
+    installed = [d for d in detections if d.installed]
+
+    if json_out:
+        typer.echo(
+            json.dumps(
+                [
+                    {
+                        "engine": d.engine_id,
+                        "binary": d.binary,
+                        "installed": d.installed,
+                        "path": d.path,
+                        "version": d.version,
+                        "matches_lock": d.version_matches_lock,
+                    }
+                    for d in detections
+                ],
+                indent=2,
+            )
+        )
+        return
+
+    typer.echo(f"{'ENGINE':16} {'INSTALLED':10} {'VERSION':12} {'MATCHES LOCK':12} PATH")
+    for d in detections:
+        colour = typer.colors.GREEN if d.installed else typer.colors.WHITE
+        match = "" if d.version_matches_lock is None else str(d.version_matches_lock)
+        ver = d.version or "-"
+        typer.secho(
+            f"{d.engine_id:16} {d.installed!s:10} {ver:12} {match:12} {d.path or ''}",
+            fg=colour,
+        )
+    typer.echo(f"\n{len(installed)}/{len(detections)} known engines installed on this host.")
+
+
 @engine_app.command("verify")
 def engine_verify(
     policy: Annotated[str, typer.Option()] = DEFAULT_POLICY,
@@ -185,6 +239,10 @@ def scan_run(
     fmt: Annotated[str, typer.Option("--format", help="json|sarif|markdown")] = "markdown",
     out: Annotated[str | None, typer.Option(help="Write report to file")] = None,
     no_oss: Annotated[bool, typer.Option("--no-oss", help="Native engines only")] = False,
+    sandbox: Annotated[
+        str,
+        typer.Option(help="Engine execution: auto|docker|local|fake (local = Kali/host binaries)"),
+    ] = "auto",
 ) -> None:
     """Run a scan against target(s) you are authorized to test."""
     if not authorize:
@@ -215,7 +273,7 @@ def scan_run(
         typer.secho(f"Unknown profile: {profile}", fg=typer.colors.RED)
         raise typer.Exit(code=2) from None
 
-    sapp = SentinelApp.build(bind_oss=not no_oss)
+    sapp = SentinelApp.build(bind_oss=not no_oss, sandbox_mode=sandbox)
     target = Target(
         tenant_id="cli",
         name=url[0],

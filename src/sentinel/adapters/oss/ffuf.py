@@ -36,6 +36,7 @@ class FfufAdapter(ContainerEngineAdapter):
     license_spdx = "MIT"
     engine_capabilities: ClassVar[list[Capability]] = [Capability.DISCOVERY_CONTENT]
     image = "ghcr.io/ffuf/ffuf"
+    binary = "ffuf"
 
     async def prepare_target(self, request: EngineRunRequest) -> PreparedRun:
         wordlist = str(request.options.get("wordlist", "/wordlists/common.txt"))
