@@ -1,1 +1,0 @@
-"""Sentinel api subsystem."""

@@ -1,0 +1,137 @@
+# Vantage engine lock file - see header in the original; digests below are
+# PLACEHOLDERS and must be resolved to real digests before release.
+engines:
+  nuclei:
+    version: v3.4.10
+    image_digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+    license: MIT
+    verified_date: '2026-09-25'
+  ffuf:
+    version: v2.1.0
+    image_digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
+    license: MIT
+    verified_date: '2026-09-25'
+  vantage-fingerprint:
+    version: 0.1.0
+    license: LicenseRef-Vantage-Proprietary
+  vantage-headers:
+    version: 0.1.0
+    license: LicenseRef-Vantage-Proprietary
+  vantage-tls:
+    version: 0.1.0
+    license: LicenseRef-Vantage-Proprietary
+  vantage-crawler:
+    version: 0.1.0
+    license: LicenseRef-Vantage-Proprietary
+  vantage-validator:
+    version: 0.1.0
+    license: LicenseRef-Vantage-Proprietary
+  zap:
+    version: 2.16.1
+    license: Apache-2.0
+    verified_date: '2026-09-25'
+    image_digest: sha256:b4c5ae2ae961fe88d12821bdf945b15482ef021703e1f900ccbe1a27f22df07f
+  katana:
+    version: v1.2.2
+    license: MIT
+    verified_date: '2026-09-25'
+    image_digest: sha256:e181b3dfcbf4b938b8254b8383c8fc0e4f1e812f6053e09abedf8034732e113c
+  feroxbuster:
+    version: v2.11.0
+    license: MIT
+    verified_date: '2026-09-25'
+    image_digest: sha256:1ee011345dbdcf4fba9ef852aaaa95e8751e57685e53d7c02c3c653bbf8fa021
+  gau:
+    version: v2.2.4
+    license: MIT
+    verified_date: '2026-09-25'
+    image_digest: sha256:49b95077e4e3c58f2b2c3bd5fdaa5b500efa288d5642e6dac84e7554144154e2
+  httpx:
+    version: v1.6.9
+    license: MIT
+    verified_date: '2026-09-25'
+    image_digest: sha256:44c3f6f83c39094fec0db8b7f158d0a8fad3418e77f5f739b103e1ac73eee5d8
+  subfinder:
+    version: v2.6.8
+    license: MIT
+    verified_date: '2026-09-25'
+    image_digest: sha256:b05dfbbd58ecdb8d18100e6aa4da0c64aeca148d41971942a8e2068375063759
+  dnsx:
+    version: v1.2.1
+    license: MIT
+    verified_date: '2026-09-25'
+    image_digest: sha256:974862cb71ca682f065cfa5686dcc54e66e4f81ddea3aff0551f294a0937c7c8
+  tlsx:
+    version: v1.1.9
+    license: MIT
+    verified_date: '2026-09-25'
+    image_digest: sha256:de7f361661d8ab208353b3ceff64981daa4949166134e711209628b443a7972d
+  gitleaks:
+    version: v8.21.2
+    license: MIT
+    verified_date: '2026-09-25'
+    image_digest: sha256:f0469ec6e4d6370876fe201c7d2ce2300f3355841c93d2326784d865a6c2f681
+  wappalyzergo:
+    version: v0.2.0
+    license: MIT
+    verified_date: '2026-09-25'
+    image_digest: sha256:08d0a24eed772a8bafc84eb44ec39fb3f0f2f44797864b8d4755be8e55d7e740
+  schemathesis:
+    version: 4.28.0
+    license: MIT
+    verified_date: '2026-09-25'
+    image_digest: sha256:ec66c0be6ebd917bd5221a965472ea65b2e9cf8def0c0d21a8988271e30848b4
+  interactsh:
+    version: v1.2.4
+    license: MIT
+    verified_date: '2026-09-25'
+    image_digest: sha256:d38087bdd7039062d5da7f52d3bf1c069f82a28c86b7584727b6825a883c2b11
+  prism:
+    version: 5.16.0
+    license: Apache-2.0
+    verified_date: '2026-09-25'
+    image_digest: sha256:bb4c8eb92b6ec7b9055c94a397581544693c61da0f8f6cbb808681ccd0d9ce9b
+  semgrep:
+    version: 1.178.0
+    license: LGPL-2.1-or-later
+    verified_date: '2026-09-25'
+    image_digest: sha256:d4d70e72310a016cd32f3f66a7b09895c94662e3e226934fd5c07dbfe45e74a3
+  trufflehog:
+    version: 3.82.13
+    license: AGPL-3.0-only
+    verified_date: '2026-09-25'
+    image_digest: sha256:b0d4d7051229875a2bfd9809c631c9899748f0e1fc6f408a446048dc6b60ca20
+  sslyze:
+    version: 6.3.1
+    license: AGPL-3.0-only
+    verified_date: '2026-09-25'
+    image_digest: sha256:7a5e9bd1853edd111989976491c7416a27c55d472cf6c7aab4c1dad754db8e2c
+  wfuzz:
+    version: 3.1.0
+    license: GPL-2.0-only
+    verified_date: '2026-09-25'
+    image_digest: sha256:68d0b1a3fa7673a81269266a12ab5d7479c0a0cb6f1c75c8d4758c766bece338
+  dirsearch:
+    version: 0.4.3
+    license: GPL-2.0-only
+    verified_date: '2026-09-25'
+    image_digest: sha256:1b2de6db6e4926d317e4cbaf65710b873cdab8eac05123779644f9fd37daf74b
+  whatweb:
+    version: 0.5.5
+    license: GPL-2.0-only
+    verified_date: '2026-09-25'
+    image_digest: sha256:d7fd04a1ad9ef4508f76b36e2036964934a515bea9132cb25ccbb28ea4cd71bb
+  testssl:
+    version: '3.2'
+    license: GPL-2.0-only
+    verified_date: '2026-09-25'
+    image_digest: sha256:593c815ad4d48660229e2cfb4656c01a75f2aaa9efd88993e7d5b07ef996d38b
+  wapiti:
+    version: 3.3.2
+    license: GPL-2.0-only
+    verified_date: '2026-09-25'
+    image_digest: sha256:561f2d42ea28b8e600dcd1fe3fb9ace2739907331487f00fdba6196806606c42
+  burp:
+    version: external
+    license: LicenseRef-PortSwigger-Commercial
+    verified_date: '2026-09-25'

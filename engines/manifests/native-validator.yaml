@@ -1,0 +1,7 @@
+id: vantage-validator
+name: Vantage Validation Engine
+vendor: Vantage DAST
+license: LicenseRef-Vantage-Proprietary
+integration: native
+capabilities: [validation]
+adapter: vantage.adapters.native.validator:ValidatorAdapter

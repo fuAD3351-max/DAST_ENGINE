@@ -1,0 +1,12 @@
+# GPL: prefer ffuf (MIT) for content discovery.
+id: wfuzz
+name: Wfuzz
+vendor: xmendez
+homepage: https://github.com/xmendez/wfuzz
+license: GPL-2.0-only
+integration: container_cli
+capabilities:
+- discovery.content
+adapter: vantage.adapters.oss.wfuzz:WfuzzAdapter
+enabled: false
+image: docker.io/vantage/wfuzz:3.1.0@sha256:68d0b1a3fa7673a81269266a12ab5d7479c0a0cb6f1c75c8d4758c766bece338

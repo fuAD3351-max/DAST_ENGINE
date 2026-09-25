@@ -1,0 +1,7 @@
+id: vantage-headers
+name: Vantage Security Headers Analyzer
+vendor: Vantage DAST
+license: LicenseRef-Vantage-Proprietary
+integration: native
+capabilities: [analysis.headers, analysis.secrets, audit.passive]
+adapter: vantage.adapters.native.headers:HeadersAdapter

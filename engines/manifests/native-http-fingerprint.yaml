@@ -1,0 +1,7 @@
+id: vantage-fingerprint
+name: Vantage Technology Fingerprint
+vendor: Vantage DAST
+license: LicenseRef-Vantage-Proprietary
+integration: native
+capabilities: [fingerprint.tech]
+adapter: vantage.adapters.native.fingerprint:FingerprintAdapter

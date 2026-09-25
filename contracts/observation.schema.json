@@ -1,0 +1,367 @@
+{
+  "$defs": {
+    "Confidence": {
+      "description": "How sure Vantage is that a finding is real.\n\nTENTATIVE: a single engine reported an indicator.\nFIRM: corroborated by several independent engines or strong evidence.\nCONFIRMED: Vantage's validation engine reproduced the behaviour.\nFALSE_POSITIVE: validation disproved it (kept for audit, hidden by default).",
+      "enum": [
+        "tentative",
+        "firm",
+        "confirmed",
+        "false_positive"
+      ],
+      "title": "Confidence",
+      "type": "string"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Artifact Refs",
+          "type": "array"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "data": {
+          "additionalProperties": true,
+          "title": "Data",
+          "type": "object"
+        },
+        "engine_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "title": "Engine Id",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/EvidenceKind"
+        },
+        "matched": {
+          "description": "Matched strings/markers",
+          "items": {
+            "type": "string"
+          },
+          "title": "Matched",
+          "type": "array"
+        },
+        "request": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HttpMessage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "response": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HttpMessage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "summary": {
+          "maxLength": 2000,
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "engine_id",
+        "summary"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "EvidenceKind": {
+      "enum": [
+        "http_exchange",
+        "response_match",
+        "dom_observation",
+        "oob_interaction",
+        "tls_observation",
+        "header_observation",
+        "validation_result",
+        "note"
+      ],
+      "title": "EvidenceKind",
+      "type": "string"
+    },
+    "HttpMessage": {
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Body"
+        },
+        "body_truncated": {
+          "default": false,
+          "title": "Body Truncated",
+          "type": "boolean"
+        },
+        "headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Headers",
+          "type": "object"
+        },
+        "method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Method"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        }
+      },
+      "title": "HttpMessage",
+      "type": "object"
+    },
+    "Location": {
+      "additionalProperties": false,
+      "properties": {
+        "host": {
+          "title": "Host",
+          "type": "string"
+        },
+        "method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Method"
+        },
+        "parameter": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parameter"
+        },
+        "parameter_location": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "query | body | header | cookie | path | json | graphql | ws",
+          "title": "Parameter Location"
+        },
+        "path": {
+          "default": "/",
+          "title": "Path",
+          "type": "string"
+        },
+        "port": {
+          "title": "Port",
+          "type": "integer"
+        },
+        "scheme": {
+          "title": "Scheme",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scheme",
+        "host",
+        "port"
+      ],
+      "title": "Location",
+      "type": "object"
+    },
+    "Severity": {
+      "enum": [
+        "info",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    }
+  },
+  "$id": "https://vantage.example/contracts/observation.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "One issue as reported by one engine, already normalized.",
+  "properties": {
+    "confidence": {
+      "$ref": "#/$defs/Confidence",
+      "default": "tentative"
+    },
+    "cwe": {
+      "items": {
+        "type": "integer"
+      },
+      "title": "Cwe",
+      "type": "array"
+    },
+    "description": {
+      "default": "",
+      "title": "Description",
+      "type": "string"
+    },
+    "detector_id": {
+      "description": "Engine-specific rule id, e.g. ZAP plugin id or template id",
+      "title": "Detector Id",
+      "type": "string"
+    },
+    "engine_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_.:-]+$",
+      "title": "Engine Id",
+      "type": "string"
+    },
+    "engine_version": {
+      "title": "Engine Version",
+      "type": "string"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/Evidence"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "location": {
+      "$ref": "#/$defs/Location"
+    },
+    "observed_at": {
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "raw_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Pointer into the raw engine artifact",
+      "title": "Raw Ref"
+    },
+    "references": {
+      "items": {
+        "type": "string"
+      },
+      "title": "References",
+      "type": "array"
+    },
+    "remediation": {
+      "default": "",
+      "title": "Remediation",
+      "type": "string"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "scan_id": {
+      "title": "Scan Id",
+      "type": "string"
+    },
+    "severity": {
+      "$ref": "#/$defs/Severity"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "vuln_class": {
+      "description": "Vantage canonical class, see findings.taxonomy",
+      "title": "Vuln Class",
+      "type": "string"
+    }
+  },
+  "required": [
+    "scan_id",
+    "run_id",
+    "engine_id",
+    "engine_version",
+    "detector_id",
+    "title",
+    "vuln_class",
+    "severity",
+    "location"
+  ],
+  "title": "Observation",
+  "type": "object",
+  "x-vantage-version": "0.1.0"
+}

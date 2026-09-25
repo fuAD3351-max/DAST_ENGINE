@@ -1,0 +1,47 @@
+# Vantage DAST reference deployment (private-cloud / on-premise).
+#
+# The control plane runs Vantage's own code. Postgres is the finding store and
+# Redis backs the (future) worker queue. Engines run as isolated sidecar
+# containers via the Docker sandbox: the control plane is given access to the
+# Docker socket so it can launch pinned, locked-down engine containers. On a
+# Kali host you can instead set VANTAGE_SANDBOX=local to use native binaries.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: vantage
+      POSTGRES_PASSWORD: change-me-in-production
+      POSTGRES_DB: vantage
+    volumes:
+      - vantage-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vantage"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+
+  control-plane:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      VANTAGE_DATABASE_URL: postgresql+psycopg://vantage:change-me-in-production@db:5432/vantage
+      VANTAGE_SANDBOX: docker
+      VANTAGE_REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8080:8080"
+    # Engine sidecar execution needs the Docker socket. In a hardened
+    # deployment, replace this with a rootless/remote Docker or a Kubernetes
+    # Jobs backend.
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  vantage-db:

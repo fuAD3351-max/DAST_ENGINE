@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vantage DAST Console</title>
+<meta name="description" content="Vantage DAST control-plane web console." />
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --ink: #1c2128; --muted: #5b6472;
+    --line: #e3e7ee; --brand: #3257d6; --brand-ink: #ffffff;
+    --green: #1a7f45; --green-bg: #e6f4ec; --yellow: #8a6d00; --yellow-bg: #fbf3d5;
+    --red: #b22222; --red-bg: #fbe6e6; --info: #5b6472; --info-bg: #eef1f5;
+    --crit: #7c1d1d; --high: #b22222; --med: #8a6d00; --low: #2f6f8f;
+    --radius: 10px; --shadow: 0 1px 3px rgba(20,25,35,.08), 0 1px 2px rgba(20,25,35,.06);
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:#0f1218; --panel:#161b23; --ink:#e8ecf2; --muted:#9aa4b2; --line:#252c37;
+      --brand:#6f8bff; --brand-ink:#0f1218; --green:#5bd08a; --green-bg:#122a1c;
+      --yellow:#e6c35a; --yellow-bg:#2a2410; --red:#ff7676; --red-bg:#2c1414;
+      --info:#9aa4b2; --info-bg:#1b212b; --crit:#ff9a9a; --high:#ff7676; --med:#e6c35a; --low:#7fbfe0;
+    }
+  }
+  :root[data-theme="dark"] {
+      --bg:#0f1218; --panel:#161b23; --ink:#e8ecf2; --muted:#9aa4b2; --line:#252c37;
+      --brand:#6f8bff; --brand-ink:#0f1218; --green:#5bd08a; --green-bg:#122a1c;
+      --yellow:#e6c35a; --yellow-bg:#2a2410; --red:#ff7676; --red-bg:#2c1414;
+      --info:#9aa4b2; --info-bg:#1b212b; --crit:#ff9a9a; --high:#ff7676; --med:#e6c35a; --low:#7fbfe0;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans); line-height:1.5; }
+  header { display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid var(--line);
+           background:var(--panel); position:sticky; top:0; z-index:5; }
+  .logo { font-weight:700; font-size:18px; letter-spacing:.2px; }
+  .logo b { color:var(--brand); }
+  .grow { flex:1; }
+  .dot { width:9px; height:9px; border-radius:50%; background:var(--muted); display:inline-block; }
+  .dot.ok { background:var(--green); } .dot.down { background:var(--red); }
+  .status { color:var(--muted); font-size:13px; display:flex; align-items:center; gap:6px; }
+  main { max-width:1100px; margin:0 auto; padding:16px; }
+  nav.tabs { display:flex; gap:4px; flex-wrap:wrap; margin:12px 0 16px; }
+  nav.tabs button { background:transparent; border:1px solid var(--line); color:var(--ink);
+    padding:8px 14px; border-radius:999px; cursor:pointer; font-size:14px; }
+  nav.tabs button.active { background:var(--brand); color:var(--brand-ink); border-color:var(--brand); }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:16px; margin-bottom:16px; }
+  h2 { font-size:16px; margin:0 0 12px; } h3 { font-size:14px; margin:14px 0 8px; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:14px; }
+  .card .n { font-size:26px; font-weight:700; } .card .l { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.4px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.4px; }
+  code, .mono { font-family:var(--mono); font-size:12px; }
+  .chip { display:inline-block; padding:1px 8px; border-radius:999px; font-size:11px; font-weight:600; }
+  .chip.GREEN { background:var(--green-bg); color:var(--green); }
+  .chip.YELLOW { background:var(--yellow-bg); color:var(--yellow); }
+  .chip.RED { background:var(--red-bg); color:var(--red); }
+  .chip.UNKNOWN { background:var(--info-bg); color:var(--info); }
+  .sev-critical{color:var(--crit);font-weight:700}.sev-high{color:var(--high);font-weight:700}
+  .sev-medium{color:var(--med);font-weight:600}.sev-low{color:var(--low)}.sev-info{color:var(--info)}
+  .verdict{font-weight:600}.verdict.confirmed,.verdict.corroborated{color:var(--green)}
+  .verdict.reported{color:var(--muted)}.verdict.disputed{color:var(--red)}
+  form.row { display:flex; gap:10px; flex-wrap:wrap; align-items:end; }
+  label { display:block; font-size:12px; color:var(--muted); margin-bottom:4px; }
+  input, select { padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--ink); font-size:14px; }
+  input[type=text]{ min-width:280px; }
+  button.action { background:var(--brand); color:var(--brand-ink); border:none; padding:9px 16px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; }
+  button.ghost { background:transparent; border:1px solid var(--line); color:var(--ink); padding:8px 12px; border-radius:8px; cursor:pointer; }
+  .muted { color:var(--muted); } .small { font-size:12px; }
+  .banner { padding:8px 12px; border-radius:8px; font-size:13px; margin-bottom:14px; }
+  .banner.preview { background:var(--yellow-bg); color:var(--yellow); }
+  .banner.live { background:var(--green-bg); color:var(--green); }
+  details.proof { margin-top:6px; } details.proof summary { cursor:pointer; color:var(--brand); font-size:12px; }
+  .kv { font-size:12px; } .kv b { color:var(--muted); font-weight:600; }
+  .hidden { display:none; }
+  a { color:var(--brand); }
+  .toggle { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <span class="logo"><b>Vantage</b> DAST</span>
+  <span class="status"><span id="healthDot" class="dot"></span><span id="healthText">connecting…</span></span>
+  <span class="grow"></span>
+  <label class="toggle"><input type="checkbox" id="confirmedOnly" /> Confirmed only</label>
+  <button class="ghost" id="themeBtn" title="Toggle theme">◐</button>
+</header>
+<main>
+  <div id="banner" class="banner preview">Preview (sample data) — start the control plane and reload for live data.</div>
+  <nav class="tabs">
+    <button data-tab="dashboard" class="active">Dashboard</button>
+    <button data-tab="engines">Engines</button>
+    <button data-tab="targets">Targets &amp; Scans</button>
+    <button data-tab="findings">Findings</button>
+  </nav>
+
+  <section id="dashboard" class="tab">
+    <div class="cards" id="statCards"></div>
+    <div class="panel" style="margin-top:16px">
+      <h2>About this console</h2>
+      <p class="muted small">Vantage unifies open-source and native engines behind one product: it plans which
+      engines to run per target, validates and correlates their output into one finding per weakness, scores
+      risk, and attaches a reproducible, tamper-evident Proof-of-Vulnerability to each. This console is served by
+      the control plane and talks to its REST API. It works air-gapped (no external resources).</p>
+    </div>
+  </section>
+
+  <section id="engines" class="tab hidden">
+    <div class="panel">
+      <h2>Engine registry <span class="muted small" id="engineCount"></span></h2>
+      <p class="muted small">License-governed. GREEN embeds/isolates freely; YELLOW needs review; RED is blocked
+      unless isolated + approved. Only policy-usable engines with a bound adapter are planned.</p>
+      <table><thead><tr><th>Engine</th><th>License</th><th>Class</th><th>Integration</th><th>Usable</th><th>Capabilities</th></tr></thead>
+      <tbody id="enginesBody"></tbody></table>
+    </div>
+  </section>
+
+  <section id="targets" class="tab hidden">
+    <div class="panel">
+      <h2>New target</h2>
+      <form class="row" id="targetForm">
+        <div><label for="tName">Name</label><input type="text" id="tName" value="demo target" /></div>
+        <div><label for="tUrl">Base URL</label><input type="text" id="tUrl" value="http://127.0.0.1:8000/" /></div>
+        <div><label for="tKind">Kind</label>
+          <select id="tKind">
+            <option value="unknown">unknown</option><option value="traditional_web">traditional web</option>
+            <option value="spa">SPA</option><option value="rest_api">REST API</option>
+            <option value="graphql_api">GraphQL</option>
+          </select></div>
+        <div><label class="toggle"><input type="checkbox" id="tAuth" /> I am authorized</label></div>
+        <button class="action" type="submit">Create target</button>
+      </form>
+      <p class="small muted" style="margin-top:8px">Authorized testing only. Scans of an unauthorized target are refused.</p>
+    </div>
+    <div class="panel">
+      <h2>Targets</h2>
+      <table><thead><tr><th>Name</th><th>Base URL</th><th>Authorized</th><th>Scan</th></tr></thead>
+      <tbody id="targetsBody"><tr><td colspan="4" class="muted small">No targets yet.</td></tr></tbody></table>
+    </div>
+  </section>
+
+  <section id="findings" class="tab hidden">
+    <div class="panel">
+      <h2>Latest scan <span class="muted small" id="scanMeta"></span></h2>
+      <div class="cards" id="sevCards" style="margin-bottom:14px"></div>
+      <table><thead><tr><th>Risk</th><th>Severity</th><th>Confidence</th><th>Category</th><th>Endpoint</th><th>Engines</th><th>Proof</th></tr></thead>
+      <tbody id="findingsBody"><tr><td colspan="7" class="muted small">Run a scan to see findings.</td></tr></tbody></table>
+    </div>
+  </section>
+</main>
+<script>
+"use strict";
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const esc = (s) => String(s==null?"":s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const state = { live:false, targets:[], lastReport:null };
+
+// ---- Sample data (offline/preview) ---------------------------------------
+const SAMPLE = {
+  engines: [
+    {id:"vantage-headers",license:"LicenseRef-Vantage-Proprietary",license_class:"GREEN",integration:"native",usable:true,capabilities:["analysis.headers","analysis.secrets","audit.passive"]},
+    {id:"vantage-tls",license:"LicenseRef-Vantage-Proprietary",license_class:"GREEN",integration:"native",usable:true,capabilities:["analysis.tls"]},
+    {id:"nuclei",license:"MIT",license_class:"GREEN",integration:"container_cli",usable:true,capabilities:["audit.templates","fingerprint.tech"]},
+    {id:"zap",license:"Apache-2.0",license_class:"GREEN",integration:"container_cli",usable:true,capabilities:["audit.active","audit.passive","crawl.http"]},
+    {id:"semgrep",license:"LGPL-2.1-or-later",license_class:"YELLOW",integration:"container_cli",usable:false,capabilities:["discovery.js"]},
+    {id:"trufflehog",license:"AGPL-3.0-only",license_class:"RED",integration:"container_cli",usable:false,capabilities:["analysis.secrets"]},
+    {id:"burp",license:"LicenseRef-PortSwigger-Commercial",license_class:"RED",integration:"external_service",usable:false,capabilities:["audit.active"]}
+  ],
+  report: {
+    scan:{id:"sample-scan",state:"completed"},
+    summary:{findings:5, by_severity:{critical:0,high:1,medium:2,low:1,info:1}, observations:37},
+    findings:[
+      {id:"f1",risk_score:50,severity:"medium",confidence:"confirmed",category:"cors_misconfiguration",endpoint:"/",method:"GET",host:"127.0.0.1",port:8000,engines:["vantage-headers"]},
+      {id:"f2",risk_score:45,severity:"medium",confidence:"confirmed",category:"missing_security_header",endpoint:"/",method:"GET",host:"127.0.0.1",port:8000,engines:["vantage-headers"]},
+      {id:"f3",risk_score:75,severity:"high",confidence:"firm",category:"secret_exposure",endpoint:"/static/app.js",method:"GET",host:"127.0.0.1",port:8000,engines:["vantage-headers"]},
+      {id:"f4",risk_score:25,severity:"low",confidence:"confirmed",category:"insecure_cookie",endpoint:"/",method:"GET",host:"127.0.0.1",port:8000,engines:["vantage-headers"]},
+      {id:"f5",risk_score:4,severity:"info",confidence:"firm",category:"information_disclosure",endpoint:"/api/user/{id}",method:"GET",host:"127.0.0.1",port:8000,engines:["vantage-crawler","vantage-headers"]}
+    ],
+    proofs:{signed:false,confirmed_count:4,bundles:[
+      {finding_id:"f1",verdict:"confirmed",integrity_sha256:"9f2c1ab34de5",differential:"Access-Control-Allow-Origin: * with credentials, reproduced on a fresh request.",reproduction:[{order:1,action:"Send an authorized GET to 127.0.0.1:8000/"},{order:2,action:"Inspect the response headers"}]},
+      {finding_id:"f3",verdict:"reported",integrity_sha256:"11aa22bb33cc",differential:"Single-engine indicator; secret pattern matched in /static/app.js (value redacted).",reproduction:[{order:1,action:"Fetch /static/app.js and confirm the redacted pattern"}]}
+    ]}
+  }
+};
+
+// ---- API ------------------------------------------------------------------
+async function api(path, opts) {
+  const r = await fetch(path, Object.assign({headers:{'Content-Type':'application/json'}}, opts||{}));
+  if (!r.ok) throw new Error(path+" → "+r.status);
+  return r.json();
+}
+async function detectLive() {
+  try { const h = await api('/health'); state.live = h.status === 'ok'; }
+  catch { state.live = false; }
+  $('#healthDot').className = 'dot ' + (state.live?'ok':'down');
+  $('#healthText').textContent = state.live ? 'live' : 'preview';
+  $('#banner').className = 'banner ' + (state.live?'live':'preview');
+  $('#banner').textContent = state.live
+    ? 'Live — connected to the Vantage control plane.'
+    : 'Preview (sample data) — start the control plane and reload for live data.';
+}
+
+// ---- Renderers ------------------------------------------------------------
+function renderEngines(engines) {
+  $('#engineCount').textContent = `(${engines.length}; ${engines.filter(e=>e.usable).length} usable)`;
+  $('#enginesBody').innerHTML = engines.map(e => `
+    <tr><td class="mono">${esc(e.id)}</td><td class="small">${esc(e.license)}</td>
+    <td><span class="chip ${esc(e.license_class)}">${esc(e.license_class)}</span></td>
+    <td class="small">${esc(e.integration)}</td>
+    <td>${e.usable?'✓':'—'}</td>
+    <td class="small muted">${(e.capabilities||[]).map(esc).join(', ')}</td></tr>`).join('');
+}
+function proofFor(report, id){ return ((report.proofs&&report.proofs.bundles)||[]).find(p=>p.finding_id===id); }
+function renderFindings(report) {
+  const meta = report.summary||{};
+  $('#scanMeta').textContent = report.scan ? `· ${report.scan.id} · ${report.scan.state}` : '';
+  const sev = (meta.by_severity)||{};
+  $('#sevCards').innerHTML = ['critical','high','medium','low','info'].map(s =>
+    `<div class="card"><div class="n sev-${s}">${sev[s]||0}</div><div class="l">${s}</div></div>`).join('');
+  let findings = report.findings||[];
+  if ($('#confirmedOnly').checked) {
+    findings = findings.filter(f => { const p=proofFor(report,f.id); return p && (p.verdict==='confirmed'||p.verdict==='corroborated'); });
+  }
+  if (!findings.length) { $('#findingsBody').innerHTML = '<tr><td colspan="7" class="muted small">No findings.</td></tr>'; return; }
+  $('#findingsBody').innerHTML = findings.map(f => {
+    const p = proofFor(report, f.id);
+    const proofCell = p ? `<span class="verdict ${esc(p.verdict)}">${esc(p.verdict)}</span>
+      <details class="proof"><summary>proof</summary>
+        <div class="kv"><b>differential:</b> ${esc(p.differential||'')}</div>
+        <div class="kv"><b>reproduce:</b> ${(p.reproduction||[]).map(s=>esc(s.order+') '+s.action)).join('; ')}</div>
+        <div class="kv"><b>integrity:</b> <code>${esc((p.integrity_sha256||'').slice(0,16))}…</code>${p.signed?' · signed':''}</div>
+      </details>` : '—';
+    return `<tr><td>${Math.round(f.risk_score||0)}</td>
+      <td class="sev-${esc(f.severity)}">${esc(f.severity)}</td>
+      <td>${esc(f.confidence)}</td><td>${esc(f.category)}</td>
+      <td class="mono small">${esc((f.method||'ANY')+' '+(f.endpoint||''))}</td>
+      <td class="small muted">${(f.engines||[]).map(esc).join(', ')}</td>
+      <td>${proofCell}</td></tr>`;
+  }).join('');
+}
+function renderStats() {
+  const eng = state.engines||[];
+  const rep = state.lastReport;
+  const usable = eng.filter(e=>e.usable).length;
+  const findings = rep ? (rep.findings||[]).length : 0;
+  const confirmed = rep && rep.proofs ? (rep.proofs.confirmed_count||0) : 0;
+  $('#statCards').innerHTML = [
+    ['Engines usable', usable+' / '+eng.length],
+    ['Last scan findings', findings],
+    ['Proof-confirmed', confirmed],
+    ['Mode', state.live?'live':'preview'],
+  ].map(([l,n]) => `<div class="card"><div class="n">${esc(n)}</div><div class="l">${esc(l)}</div></div>`).join('');
+}
+function renderTargets() {
+  const b = $('#targetsBody');
+  if (!state.targets.length) { b.innerHTML = '<tr><td colspan="4" class="muted small">No targets yet.</td></tr>'; return; }
+  b.innerHTML = state.targets.map(t => `<tr><td>${esc(t.name)}</td><td class="mono small">${esc((t.base_urls||[])[0]||'')}</td>
+    <td>${t.authorized?'✓':'✗'}</td>
+    <td>${t.authorized?`<button class="ghost" data-scan="${esc(t.id)}">Scan</button>`:'<span class="muted small">authorize first</span>'}</td></tr>`).join('');
+  $$('#targetsBody [data-scan]').forEach(btn => btn.addEventListener('click', () => startScan(btn.dataset.scan)));
+}
+
+// ---- Actions --------------------------------------------------------------
+async function createTarget(e) {
+  e.preventDefault();
+  const body = { name: $('#tName').value, base_urls: [$('#tUrl').value], kind: $('#tKind').value, authorized: $('#tAuth').checked };
+  if (!state.live) {
+    const t = { id:'local-'+Date.now(), name:body.name, base_urls:body.base_urls, authorized:body.authorized };
+    state.targets.push(t); renderTargets(); return;
+  }
+  try { const r = await api('/targets', {method:'POST', body:JSON.stringify(body)});
+    state.targets.push({id:r.id, name:body.name, base_urls:body.base_urls, authorized:r.authorized}); renderTargets(); }
+  catch (err) { alert('Create target failed: '+err.message); }
+}
+async function startScan(targetId) {
+  const profile = 'standard';
+  if (!state.live) { state.lastReport = SAMPLE.report; state.engines = SAMPLE.engines; renderFindings(state.lastReport); renderStats(); switchTab('findings'); return; }
+  try {
+    const res = await api('/scans', {method:'POST', body:JSON.stringify({target_id:targetId, profile})});
+    const report = await api(`/scans/${res.scan_id}/report?fmt=json`);
+    state.lastReport = report; renderFindings(report); renderStats(); switchTab('findings');
+  } catch (err) { alert('Scan failed: '+err.message); }
+}
+
+// ---- Tabs / theme ---------------------------------------------------------
+function switchTab(name) {
+  $$('.tab').forEach(s => s.classList.toggle('hidden', s.id !== name));
+  $$('nav.tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+}
+$$('nav.tabs button').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
+$('#themeBtn').addEventListener('click', () => {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('vantage-theme', next); } catch {}
+});
+try { const saved = localStorage.getItem('vantage-theme'); if (saved) document.documentElement.setAttribute('data-theme', saved); } catch {}
+$('#targetForm').addEventListener('submit', createTarget);
+$('#confirmedOnly').addEventListener('change', () => { if (state.lastReport) renderFindings(state.lastReport); });
+
+// ---- Boot -----------------------------------------------------------------
+async function boot() {
+  await detectLive();
+  try { state.engines = state.live ? await api('/engines') : SAMPLE.engines; }
+  catch { state.engines = SAMPLE.engines; }
+  if (!state.live) { state.lastReport = SAMPLE.report; }
+  renderEngines(state.engines);
+  if (state.lastReport) renderFindings(state.lastReport);
+  renderStats();
+  renderTargets();
+}
+boot();
+</script>
+</body>
+</html>

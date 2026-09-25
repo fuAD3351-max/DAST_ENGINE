@@ -1,0 +1,27 @@
+# systemd unit for the Vantage DAST control plane on a Linux/Kali host.
+# Install: copy to /etc/systemd/system/, adjust paths/user, then:
+#   systemctl daemon-reload && systemctl enable --now vantage
+[Unit]
+Description=Vantage DAST control plane
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=vantage
+WorkingDirectory=/opt/vantage-dast
+Environment=VANTAGE_SANDBOX=local
+Environment=VANTAGE_AUTODETECT=1
+Environment=VANTAGE_DATABASE_URL=sqlite+pysqlite:////opt/vantage-dast/var/vantage.db
+ExecStart=/opt/vantage-dast/.venv/bin/uvicorn vantage.api.app:app --host 0.0.0.0 --port 8080
+Restart=on-failure
+RestartSec=5
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/vantage-dast/var
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,12 @@
+# Secret detection over collected artifacts (GREEN; preferred over trufflehog).
+id: gitleaks
+name: Gitleaks
+vendor: gitleaks
+homepage: https://github.com/gitleaks/gitleaks
+license: MIT
+integration: container_cli
+capabilities:
+- analysis.secrets
+adapter: vantage.adapters.oss.gitleaks:GitleaksAdapter
+enabled: false
+image: ghcr.io/gitleaks/gitleaks:v8.21.2@sha256:f0469ec6e4d6370876fe201c7d2ce2300f3355841c93d2326784d865a6c2f681

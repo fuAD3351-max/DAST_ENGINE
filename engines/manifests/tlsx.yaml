@@ -1,0 +1,12 @@
+# TLS grabber; alternative to the native TLS analyzer.
+id: tlsx
+name: tlsx
+vendor: ProjectDiscovery
+homepage: https://github.com/projectdiscovery/tlsx
+license: MIT
+integration: container_cli
+capabilities:
+- analysis.tls
+adapter: vantage.adapters.oss.tlsx:TlsxAdapter
+enabled: false
+image: ghcr.io/projectdiscovery/tlsx:v1.1.9@sha256:de7f361661d8ab208353b3ceff64981daa4949166134e711209628b443a7972d

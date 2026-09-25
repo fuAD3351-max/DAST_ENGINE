@@ -1,0 +1,12 @@
+# DNS resolution and record analysis.
+id: dnsx
+name: dnsx
+vendor: ProjectDiscovery
+homepage: https://github.com/projectdiscovery/dnsx
+license: MIT
+integration: container_cli
+capabilities:
+- analysis.dns
+adapter: vantage.adapters.oss.dnsx:DnsxAdapter
+enabled: false
+image: ghcr.io/projectdiscovery/dnsx:v1.2.1@sha256:974862cb71ca682f065cfa5686dcc54e66e4f81ddea3aff0551f294a0937c7c8

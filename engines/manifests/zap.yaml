@@ -1,0 +1,16 @@
+# Full-featured DAST; run as daemon in container.
+id: zap
+name: OWASP ZAP
+vendor: OWASP
+homepage: https://www.zaproxy.org
+license: Apache-2.0
+integration: container_api
+capabilities:
+- audit.active
+- audit.passive
+- crawl.http
+- crawl.browser
+- discovery.content
+adapter: vantage.adapters.oss.zap:ZapAdapter
+enabled: true
+image: ghcr.io/zaproxy/zaproxy:2.16.1@sha256:b4c5ae2ae961fe88d12821bdf945b15482ef021703e1f900ccbe1a27f22df07f

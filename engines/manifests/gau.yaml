@@ -1,0 +1,12 @@
+# Passive URL sourcing from OSINT feeds.
+id: gau
+name: getallurls (gau)
+vendor: lc
+homepage: https://github.com/lc/gau
+license: MIT
+integration: container_cli
+capabilities:
+- crawl.http
+adapter: vantage.adapters.oss.gau:GauAdapter
+enabled: false
+image: docker.io/sensepost/gau:v2.2.4@sha256:49b95077e4e3c58f2b2c3bd5fdaa5b500efa288d5642e6dac84e7554144154e2

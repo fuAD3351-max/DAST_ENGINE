@@ -1,0 +1,35 @@
+{
+  "version": "0.1.0",
+  "schemas": [
+    {
+      "name": "scope-rule",
+      "file": "scope-rule.schema.json",
+      "title": "ScopeRule"
+    },
+    {
+      "name": "target",
+      "file": "target.schema.json",
+      "title": "Target"
+    },
+    {
+      "name": "engine-run-request",
+      "file": "engine-run-request.schema.json",
+      "title": "EngineRunRequest"
+    },
+    {
+      "name": "evidence",
+      "file": "evidence.schema.json",
+      "title": "Evidence"
+    },
+    {
+      "name": "observation",
+      "file": "observation.schema.json",
+      "title": "Observation"
+    },
+    {
+      "name": "unified-finding",
+      "file": "unified-finding.schema.json",
+      "title": "UnifiedFinding"
+    }
+  ]
+}

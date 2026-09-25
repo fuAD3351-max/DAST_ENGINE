@@ -1,0 +1,101 @@
+# Vantage DAST license policy
+#
+# This file is the machine-readable source of truth for `vantage license check`.
+# It classifies SPDX license identifiers into policy classes. The build FAILS if
+# any tracked component is RED or UNKNOWN, or is YELLOW without a recorded
+# approval. The tool never makes a legal conclusion on its own: YELLOW and RED
+# both route to human review; the policy only encodes which bucket applies.
+#
+# Distribution model assumed here: Vantage is shipped as a commercial product
+# (containers + installable control plane). Copyleft obligations therefore
+# matter. External engines under YELLOW/RED licenses may still be shipped when
+# they run as UNMODIFIED, separate programs in isolated containers invoked over
+# CLI/API (arm's-length aggregation) -- but that arrangement itself requires a
+# recorded legal review, captured per-component in the inventory.
+
+version: 1
+
+classes:
+  GREEN:
+    description: >-
+      Permissive. Commercially straightforward after attribution/notice review.
+      Safe to embed (static or dynamic linking) and redistribute.
+    action: allow
+    spdx:
+      - MIT
+      - MIT-0
+      - ISC
+      - 0BSD
+      - BSD-2-Clause
+      - BSD-3-Clause
+      - Apache-2.0
+      - PSF-2.0
+      - Python-2.0
+      - Python-2.0.1
+      - Zlib
+      - Unlicense
+      - BSL-1.0            # Boost Software License (permissive; not Business Source)
+      - CC0-1.0
+      - WTFPL
+      - Apache-2.0 WITH LLVM-exception
+
+  YELLOW:
+    description: >-
+      Weak copyleft or otherwise conditional. Embedding may trigger source or
+      notice obligations. Requires a recorded legal/compliance review before
+      distribution; allowed once approved and the obligation is satisfied.
+    action: review
+    spdx:
+      - LGPL-2.1-only
+      - LGPL-2.1-or-later
+      - LGPL-3.0-only
+      - LGPL-3.0-or-later
+      - MPL-2.0
+      - EPL-1.0
+      - EPL-2.0
+      - CDDL-1.0
+      - CDDL-1.1
+      - CC-BY-4.0          # data/content (e.g. rule sets), not code
+      - CC-BY-SA-4.0
+      - OFL-1.1
+      - Ruby
+      - Artistic-2.0
+
+  RED:
+    description: >-
+      Strong or network copyleft, or source-available / non-commercial. Do NOT
+      embed or redistribute inside the product until the licensing implications
+      are resolved. May be permitted ONLY as an unmodified, isolated, separately
+      distributed engine after explicit recorded legal approval.
+    action: block
+    spdx:
+      - GPL-2.0-only
+      - GPL-2.0-or-later
+      - GPL-3.0-only
+      - GPL-3.0-or-later
+      - AGPL-3.0-only
+      - AGPL-3.0-or-later
+      - SSPL-1.0
+      - BUSL-1.1           # Business Source License
+      - Elastic-2.0
+      - Commons-Clause
+      - CC-BY-NC-4.0
+      - CC-BY-NC-SA-4.0
+      - Prosperity-3.0.0
+      - PolyForm-Noncommercial-1.0.0
+      # Proprietary commercial licenses. These can NEVER be embedded or
+      # redistributed by Vantage. They are permitted only via an
+      # EXTERNAL_SERVICE integration, where the customer hosts and licenses the
+      # software themselves and Vantage ships only an API client.
+      - LicenseRef-Commercial
+      - LicenseRef-PortSwigger-Commercial
+
+# Any SPDX id not listed above is treated as UNKNOWN -> blocks the build and
+# routes to review. Custom / non-SPDX strings must be added explicitly.
+unknown_action: block
+
+# Integration types that let a RED/YELLOW component ship without its obligations
+# reaching Vantage's own code -- still requires per-component recorded approval.
+arms_length_integration_types:
+  - container_cli
+  - container_api

@@ -1,0 +1,12 @@
+# GPL: prefer ffuf/feroxbuster (MIT).
+id: dirsearch
+name: dirsearch
+vendor: maurosoria
+homepage: https://github.com/maurosoria/dirsearch
+license: GPL-2.0-only
+integration: container_cli
+capabilities:
+- discovery.content
+adapter: vantage.adapters.oss.dirsearch:DirsearchAdapter
+enabled: false
+image: docker.io/vantage/dirsearch:0.4.3@sha256:1b2de6db6e4926d317e4cbaf65710b873cdab8eac05123779644f9fd37daf74b

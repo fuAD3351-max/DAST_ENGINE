@@ -1,0 +1,12 @@
+# Recursive content discovery.
+id: feroxbuster
+name: feroxbuster
+vendor: epi052
+homepage: https://github.com/epi052/feroxbuster
+license: MIT
+integration: container_cli
+capabilities:
+- discovery.content
+adapter: vantage.adapters.oss.feroxbuster:FeroxbusterAdapter
+enabled: false
+image: ghcr.io/epi052/feroxbuster:v2.11.0@sha256:1ee011345dbdcf4fba9ef852aaaa95e8751e57685e53d7c02c3c653bbf8fa021

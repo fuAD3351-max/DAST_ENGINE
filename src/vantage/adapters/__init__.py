@@ -1,0 +1,1 @@
+"""Vantage adapters subsystem."""

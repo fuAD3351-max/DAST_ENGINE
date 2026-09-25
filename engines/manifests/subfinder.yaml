@@ -1,0 +1,12 @@
+# Passive subdomain enumeration for attack-surface inventory.
+id: subfinder
+name: subfinder
+vendor: ProjectDiscovery
+homepage: https://github.com/projectdiscovery/subfinder
+license: MIT
+integration: container_cli
+capabilities:
+- discovery.subdomain
+adapter: vantage.adapters.oss.subfinder:SubfinderAdapter
+enabled: false
+image: ghcr.io/projectdiscovery/subfinder:v2.6.8@sha256:b05dfbbd58ecdb8d18100e6aa4da0c64aeca148d41971942a8e2068375063759

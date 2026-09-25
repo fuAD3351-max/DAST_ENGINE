@@ -1,0 +1,12 @@
+# Client-side static assist. LGPL: run isolated; rules registry licensed separately.
+id: semgrep
+name: Semgrep CE
+vendor: Semgrep
+homepage: https://github.com/semgrep/semgrep
+license: LGPL-2.1-or-later
+integration: container_cli
+capabilities:
+- discovery.js
+adapter: vantage.adapters.oss.semgrep:SemgrepAdapter
+enabled: false
+image: docker.io/semgrep/semgrep:1.178.0@sha256:d4d70e72310a016cd32f3f66a7b09895c94662e3e226934fd5c07dbfe45e74a3

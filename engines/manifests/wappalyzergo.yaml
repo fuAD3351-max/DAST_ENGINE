@@ -1,0 +1,12 @@
+# MIT-licensed fingerprint DB (replacement for GPL WhatWeb/Wappalyzer).
+id: wappalyzergo
+name: wappalyzergo
+vendor: ProjectDiscovery
+homepage: https://github.com/projectdiscovery/wappalyzergo
+license: MIT
+integration: container_cli
+capabilities:
+- fingerprint.tech
+adapter: vantage.adapters.oss.wappalyzergo:WappalyzergoAdapter
+enabled: false
+image: docker.io/vantage/wappalyzergo:v0.2.0@sha256:08d0a24eed772a8bafc84eb44ec39fb3f0f2f44797864b8d4755be8e55d7e740

@@ -1,0 +1,12 @@
+# OpenAPI contract validation/mocking support.
+id: prism
+name: Stoplight Prism
+vendor: Stoplight
+homepage: https://github.com/stoplightio/prism
+license: Apache-2.0
+integration: container_cli
+capabilities:
+- discovery.api_spec
+adapter: vantage.adapters.oss.prism:PrismAdapter
+enabled: false
+image: docker.io/stoplight/prism:5.16.0@sha256:bb4c8eb92b6ec7b9055c94a397581544693c61da0f8f6cbb808681ccd0d9ce9b

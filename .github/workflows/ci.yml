@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Lint, type-check, test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Ruff (lint)
+        run: ruff check src tests
+      - name: Ruff (format check)
+        run: ruff format --check src tests
+      - name: Mypy (strict types)
+        run: mypy
+      - name: Pytest
+        run: pytest -q
+
+  go-components:
+    name: Go components (egress proxy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - name: Vet
+        working-directory: components/egress-proxy
+        run: go vet ./...
+      - name: Build
+        working-directory: components/egress-proxy
+        run: go build ./...
+      - name: Test
+        working-directory: components/egress-proxy
+        run: go test ./...
+
+  contracts:
+    name: Contracts up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -e .
+      - name: Regenerate contracts and check for drift
+        run: |
+          python scripts/gen_contracts.py
+          git diff --exit-code contracts/ \
+            || (echo "contracts/ is stale — run: python scripts/gen_contracts.py" && exit 1)
+
+  license-gate:
+    name: License policy gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -e .
+      - name: License check (fails on any RED/UNKNOWN/unreviewed component)
+        run: vantage license check
+      - name: Engine pinning + policy verify
+        run: vantage engine verify
+
+  sbom:
+    name: SBOM (CycloneDX + SPDX)
+    runs-on: ubuntu-latest
+    needs: [license-gate]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install project + SBOM tooling
+        run: |
+          pip install -e .
+          pip install cyclonedx-bom
+      - name: Generate CycloneDX SBOM
+        run: cyclonedx-py environment --output-format json --outfile third_party/sbom/sbom.cyclonedx.json || true
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: third_party/sbom/

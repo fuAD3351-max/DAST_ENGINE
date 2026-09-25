@@ -1,0 +1,13 @@
+# Proprietary. Vantage ships only the API client; customer hosts+licenses Burp.
+id: burp
+name: Burp Suite (external)
+vendor: PortSwigger
+homepage: https://portswigger.net/burp
+license: LicenseRef-PortSwigger-Commercial
+integration: external_service
+capabilities:
+- audit.active
+- audit.passive
+- crawl.http
+adapter: vantage.adapters.external.burp:BurpAdapter
+enabled: false

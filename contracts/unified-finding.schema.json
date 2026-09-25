@@ -1,0 +1,380 @@
+{
+  "$defs": {
+    "Confidence": {
+      "description": "How sure Vantage is that a finding is real.\n\nTENTATIVE: a single engine reported an indicator.\nFIRM: corroborated by several independent engines or strong evidence.\nCONFIRMED: Vantage's validation engine reproduced the behaviour.\nFALSE_POSITIVE: validation disproved it (kept for audit, hidden by default).",
+      "enum": [
+        "tentative",
+        "firm",
+        "confirmed",
+        "false_positive"
+      ],
+      "title": "Confidence",
+      "type": "string"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Artifact Refs",
+          "type": "array"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "data": {
+          "additionalProperties": true,
+          "title": "Data",
+          "type": "object"
+        },
+        "engine_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "title": "Engine Id",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/EvidenceKind"
+        },
+        "matched": {
+          "description": "Matched strings/markers",
+          "items": {
+            "type": "string"
+          },
+          "title": "Matched",
+          "type": "array"
+        },
+        "request": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HttpMessage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "response": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HttpMessage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "summary": {
+          "maxLength": 2000,
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "engine_id",
+        "summary"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "EvidenceKind": {
+      "enum": [
+        "http_exchange",
+        "response_match",
+        "dom_observation",
+        "oob_interaction",
+        "tls_observation",
+        "header_observation",
+        "validation_result",
+        "note"
+      ],
+      "title": "EvidenceKind",
+      "type": "string"
+    },
+    "FindingStatus": {
+      "enum": [
+        "open",
+        "triaged",
+        "accepted_risk",
+        "fixed",
+        "false_positive"
+      ],
+      "title": "FindingStatus",
+      "type": "string"
+    },
+    "HttpMessage": {
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Body"
+        },
+        "body_truncated": {
+          "default": false,
+          "title": "Body Truncated",
+          "type": "boolean"
+        },
+        "headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Headers",
+          "type": "object"
+        },
+        "method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Method"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        }
+      },
+      "title": "HttpMessage",
+      "type": "object"
+    },
+    "Severity": {
+      "enum": [
+        "info",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    }
+  },
+  "$id": "https://vantage.example/contracts/unified-finding.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The single user-facing finding produced by correlation.",
+  "properties": {
+    "affected_urls": {
+      "description": "Concrete URLs behind a templated/site-wide finding",
+      "items": {
+        "type": "string"
+      },
+      "title": "Affected Urls",
+      "type": "array"
+    },
+    "category": {
+      "description": "Vantage canonical vulnerability class",
+      "title": "Category",
+      "type": "string"
+    },
+    "confidence": {
+      "$ref": "#/$defs/Confidence"
+    },
+    "cwe": {
+      "items": {
+        "type": "integer"
+      },
+      "title": "Cwe",
+      "type": "array"
+    },
+    "description": {
+      "default": "",
+      "title": "Description",
+      "type": "string"
+    },
+    "detectors": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Detectors",
+      "type": "array"
+    },
+    "endpoint": {
+      "description": "Normalized path template, e.g. /api/users/{id}",
+      "title": "Endpoint",
+      "type": "string"
+    },
+    "engines": {
+      "description": "Contributing engine ids",
+      "items": {
+        "type": "string"
+      },
+      "title": "Engines",
+      "type": "array"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/Evidence"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "fingerprint": {
+      "description": "Correlation key; stable across scans",
+      "title": "Fingerprint",
+      "type": "string"
+    },
+    "first_seen": {
+      "format": "date-time",
+      "title": "First Seen",
+      "type": "string"
+    },
+    "host": {
+      "title": "Host",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "last_seen": {
+      "format": "date-time",
+      "title": "Last Seen",
+      "type": "string"
+    },
+    "method": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Method"
+    },
+    "observation_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Observation Ids",
+      "type": "array"
+    },
+    "owasp": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Owasp",
+      "type": "array"
+    },
+    "parameter": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Parameter"
+    },
+    "port": {
+      "title": "Port",
+      "type": "integer"
+    },
+    "references": {
+      "items": {
+        "type": "string"
+      },
+      "title": "References",
+      "type": "array"
+    },
+    "remediation": {
+      "default": "",
+      "title": "Remediation",
+      "type": "string"
+    },
+    "risk_score": {
+      "default": 0.0,
+      "maximum": 100.0,
+      "minimum": 0.0,
+      "title": "Risk Score",
+      "type": "number"
+    },
+    "scan_id": {
+      "title": "Scan Id",
+      "type": "string"
+    },
+    "severity": {
+      "$ref": "#/$defs/Severity"
+    },
+    "status": {
+      "$ref": "#/$defs/FindingStatus",
+      "default": "open"
+    },
+    "target_id": {
+      "title": "Target Id",
+      "type": "string"
+    },
+    "tenant_id": {
+      "title": "Tenant Id",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "scan_id",
+    "target_id",
+    "fingerprint",
+    "title",
+    "category",
+    "severity",
+    "confidence",
+    "host",
+    "port",
+    "endpoint"
+  ],
+  "title": "UnifiedFinding",
+  "type": "object",
+  "x-vantage-version": "0.1.0"
+}

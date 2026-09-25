@@ -1,0 +1,7 @@
+id: vantage-crawler
+name: Vantage HTTP Crawler
+vendor: Vantage DAST
+license: LicenseRef-Vantage-Proprietary
+integration: native
+capabilities: [crawl.http, discovery.js]
+adapter: vantage.adapters.native.crawler:CrawlerAdapter
