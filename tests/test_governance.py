@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from sentinel.domain.common import ApprovalStatus, LicenseClass
-from sentinel.governance.inventory import Component, IntegrationType, Inventory, check_inventory
-from sentinel.governance.policy import LicensePolicy
+from vantage.domain.common import ApprovalStatus, LicenseClass
+from vantage.governance.inventory import Component, IntegrationType, Inventory, check_inventory
+from vantage.governance.policy import LicensePolicy
 
 POLICY = "third_party/policy/license-policy.yaml"
 

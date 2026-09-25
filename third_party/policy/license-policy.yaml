@@ -1,12 +1,12 @@
-# Sentinel DAST license policy
+# Vantage DAST license policy
 #
-# This file is the machine-readable source of truth for `sentinel license check`.
+# This file is the machine-readable source of truth for `vantage license check`.
 # It classifies SPDX license identifiers into policy classes. The build FAILS if
 # any tracked component is RED or UNKNOWN, or is YELLOW without a recorded
 # approval. The tool never makes a legal conclusion on its own: YELLOW and RED
 # both route to human review; the policy only encodes which bucket applies.
 #
-# Distribution model assumed here: Sentinel is shipped as a commercial product
+# Distribution model assumed here: Vantage is shipped as a commercial product
 # (containers + installable control plane). Copyleft obligations therefore
 # matter. External engines under YELLOW/RED licenses may still be shipped when
 # they run as UNMODIFIED, separate programs in isolated containers invoked over
@@ -84,9 +84,9 @@ classes:
       - Prosperity-3.0.0
       - PolyForm-Noncommercial-1.0.0
       # Proprietary commercial licenses. These can NEVER be embedded or
-      # redistributed by Sentinel. They are permitted only via an
+      # redistributed by Vantage. They are permitted only via an
       # EXTERNAL_SERVICE integration, where the customer hosts and licenses the
-      # software themselves and Sentinel ships only an API client.
+      # software themselves and Vantage ships only an API client.
       - LicenseRef-Commercial
       - LicenseRef-PortSwigger-Commercial
 
@@ -95,7 +95,7 @@ classes:
 unknown_action: block
 
 # Integration types that let a RED/YELLOW component ship without its obligations
-# reaching Sentinel's own code -- still requires per-component recorded approval.
+# reaching Vantage's own code -- still requires per-component recorded approval.
 arms_length_integration_types:
   - container_cli
   - container_api

@@ -7,6 +7,6 @@ license: GPL-2.0-only
 integration: container_cli
 capabilities:
 - analysis.tls
-adapter: sentinel.adapters.oss.testssl:TestsslAdapter
+adapter: vantage.adapters.oss.testssl:TestsslAdapter
 enabled: false
 image: docker.io/drwetter/testssl.sh:3.2@sha256:593c815ad4d48660229e2cfb4656c01a75f2aaa9efd88993e7d5b07ef996d38b

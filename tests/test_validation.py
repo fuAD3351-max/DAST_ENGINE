@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from sentinel.domain import (
+from vantage.domain import (
     Confidence,
     Evidence,
     EvidenceKind,
@@ -12,7 +12,7 @@ from sentinel.domain import (
     Observation,
     Severity,
 )
-from sentinel.scan.validation import Prober, ProbeResponse, ValidationEngine
+from vantage.scan.validation import Prober, ProbeResponse, ValidationEngine
 
 pytestmark = pytest.mark.asyncio
 
@@ -32,7 +32,7 @@ def _header_obs() -> Observation:
     return Observation(
         scan_id="s",
         run_id="r",
-        engine_id="sentinel-headers",
+        engine_id="vantage-headers",
         engine_version="1",
         detector_id="missing-header:content-security-policy",
         title="Missing CSP",
@@ -42,7 +42,7 @@ def _header_obs() -> Observation:
         evidence=[
             Evidence(
                 kind=EvidenceKind.HEADER_OBSERVATION,
-                engine_id="sentinel-headers",
+                engine_id="vantage-headers",
                 summary="csp absent",
                 matched=["content-security-policy"],
             )
@@ -89,7 +89,7 @@ async def test_reflection_marker_absent_from_baseline_raises_to_firm() -> None:
                 kind=EvidenceKind.RESPONSE_MATCH,
                 engine_id="zap",
                 summary="reflected",
-                matched=["sentinel-unique-marker-xyz"],
+                matched=["vantage-unique-marker-xyz"],
             )
         ],
     )

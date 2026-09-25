@@ -1,7 +1,7 @@
-id: sentinel-crawler
-name: Sentinel HTTP Crawler
-vendor: Sentinel DAST
-license: LicenseRef-Sentinel-Proprietary
+id: vantage-crawler
+name: Vantage HTTP Crawler
+vendor: Vantage DAST
+license: LicenseRef-Vantage-Proprietary
 integration: native
 capabilities: [crawl.http, discovery.js]
-adapter: sentinel.adapters.native.crawler:CrawlerAdapter
+adapter: vantage.adapters.native.crawler:CrawlerAdapter

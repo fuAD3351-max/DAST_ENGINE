@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from sentinel.domain import (
+from vantage.domain import (
     Confidence,
     Evidence,
     EvidenceKind,
@@ -10,9 +10,9 @@ from sentinel.domain import (
     Observation,
     Severity,
 )
-from sentinel.findings import taxonomy
-from sentinel.findings.correlation import CorrelationEngine, normalize_endpoint
-from sentinel.findings.risk import RiskEngine
+from vantage.findings import taxonomy
+from vantage.findings.correlation import CorrelationEngine, normalize_endpoint
+from vantage.findings.risk import RiskEngine
 
 
 def _obs(engine: str, cwe: list[int], path: str, sev: Severity, marker: str = "m") -> Observation:

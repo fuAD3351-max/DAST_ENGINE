@@ -1,7 +1,7 @@
-id: sentinel-validator
-name: Sentinel Validation Engine
-vendor: Sentinel DAST
-license: LicenseRef-Sentinel-Proprietary
+id: vantage-validator
+name: Vantage Validation Engine
+vendor: Vantage DAST
+license: LicenseRef-Vantage-Proprietary
 integration: native
 capabilities: [validation]
-adapter: sentinel.adapters.native.validator:ValidatorAdapter
+adapter: vantage.adapters.native.validator:ValidatorAdapter

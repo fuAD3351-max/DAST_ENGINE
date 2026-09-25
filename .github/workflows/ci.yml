@@ -41,9 +41,9 @@ jobs:
       - name: Install
         run: pip install -e .
       - name: License check (fails on any RED/UNKNOWN/unreviewed component)
-        run: sentinel license check
+        run: vantage license check
       - name: Engine pinning + policy verify
-        run: sentinel engine verify
+        run: vantage engine verify
 
   sbom:
     name: SBOM (CycloneDX + SPDX)

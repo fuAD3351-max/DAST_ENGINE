@@ -5,7 +5,7 @@ homepage: https://github.com/projectdiscovery/nuclei
 license: MIT
 integration: container_cli
 capabilities: [audit.templates, fingerprint.tech]
-adapter: sentinel.adapters.oss.nuclei:NucleiAdapter
+adapter: vantage.adapters.oss.nuclei:NucleiAdapter
 image: ghcr.io/projectdiscovery/nuclei:v3.4.10@sha256:0000000000000000000000000000000000000000000000000000000000000000
 default_limits:
   cpus: 2.0

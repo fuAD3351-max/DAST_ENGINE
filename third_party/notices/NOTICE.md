@@ -1,6 +1,6 @@
-# Third-Party Notices — Sentinel DAST
+# Third-Party Notices — Vantage DAST
 
-Sentinel DAST incorporates and/or integrates the third-party components listed
+Vantage DAST incorporates and/or integrates the third-party components listed
 in `third_party/inventory/third_party_inventory.yaml`. This NOTICE aggregates
 the attribution required by their licenses. Full license texts belong in
 `third_party/licenses/` (populated by the release process from each component's
@@ -33,10 +33,10 @@ upstream LICENSE file).
 
 Engines declared in `engines/manifests/` but under GPL/AGPL (e.g. trufflehog,
 wfuzz, dirsearch, whatweb, testssl.sh, wapiti, sslyze) or LGPL (semgrep) are NOT
-bundled or redistributed with Sentinel. They may be run only as unmodified,
+bundled or redistributed with Vantage. They may be run only as unmodified,
 isolated programs after a recorded legal review, or replaced by the permissive
-alternatives Sentinel ships natively. Burp Suite (PortSwigger, commercial) is
+alternatives Vantage ships natively. Burp Suite (PortSwigger, commercial) is
 integrated only as an external, customer-hosted, separately-licensed service;
-Sentinel distributes only the API client.
+Vantage distributes only the API client.
 
 A machine-readable SBOM is generated at `third_party/sbom/sbom.cyclonedx.json`.

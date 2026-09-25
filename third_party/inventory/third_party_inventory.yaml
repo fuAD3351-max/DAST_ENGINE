@@ -1,7 +1,7 @@
-# Sentinel DAST third-party inventory (authoritative).
+# Vantage DAST third-party inventory (authoritative).
 #
-# Every third-party component Sentinel ships or depends on is listed here.
-# `sentinel license check` validates this file against
+# Every third-party component Vantage ships or depends on is listed here.
+# `vantage license check` validates this file against
 # third_party/policy/license-policy.yaml and fails CI on any error.
 #
 # This file currently tracks the CONTROL-PLANE runtime dependencies (all
@@ -137,7 +137,7 @@ components:
     notes: "X.509 certificate parsing for the native TLS analyzer (bundles OpenSSL under Apache/BSD-compatible terms; ships as wheels)."
 
   # ---- Isolated open-source ENGINE images (arms-length container_cli) -------
-  # Only engines Sentinel actually ships/pulls by default are tracked here.
+  # Only engines Vantage actually ships/pulls by default are tracked here.
   # Additional engines are DECLARED in engines/manifests (governed by the
   # license policy) but disabled until an adapter is bound and, for RED/YELLOW
   # licenses, a legal review is recorded. See docs/assessment/.

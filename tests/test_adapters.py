@@ -6,15 +6,15 @@ import json
 
 import pytest
 
-from sentinel.adapters.external.burp import BurpAdapter, BurpConfig, FakeBurpTransport
-from sentinel.adapters.http import FakeHttpClient, FetchResult
-from sentinel.adapters.native.fingerprint import FingerprintAdapter
-from sentinel.adapters.native.headers import HeadersAdapter
-from sentinel.adapters.oss.ffuf import FfufAdapter
-from sentinel.adapters.oss.nuclei import NucleiAdapter
-from sentinel.domain import Capability, EngineRunRequest, Severity
-from sentinel.engines.adapter import SandboxResult
-from sentinel.engines.sandbox import FakeSandboxRunner
+from vantage.adapters.external.burp import BurpAdapter, BurpConfig, FakeBurpTransport
+from vantage.adapters.http import FakeHttpClient, FetchResult
+from vantage.adapters.native.fingerprint import FingerprintAdapter
+from vantage.adapters.native.headers import HeadersAdapter
+from vantage.adapters.oss.ffuf import FfufAdapter
+from vantage.adapters.oss.nuclei import NucleiAdapter
+from vantage.domain import Capability, EngineRunRequest, Severity
+from vantage.engines.adapter import SandboxResult
+from vantage.engines.sandbox import FakeSandboxRunner
 
 
 def _request(engine_id: str, caps: list[Capability], url: str) -> EngineRunRequest:
@@ -51,7 +51,7 @@ async def test_headers_adapter_flags_missing_headers() -> None:
     )
     obs = await _run_native(
         HeadersAdapter(),
-        _request("sentinel-headers", [Capability.ANALYSIS_HEADERS], url),
+        _request("vantage-headers", [Capability.ANALYSIS_HEADERS], url),
         client,
     )
     classes = {o.vuln_class for o in obs}
@@ -66,7 +66,7 @@ async def test_headers_adapter_detects_secret() -> None:
         responses={url: FetchResult(url, 200, {"content-type": "text/html"}, body, 1.0)}
     )
     obs = await _run_native(
-        HeadersAdapter(), _request("sentinel-headers", [Capability.ANALYSIS_SECRETS], url), client
+        HeadersAdapter(), _request("vantage-headers", [Capability.ANALYSIS_SECRETS], url), client
     )
     secrets = [o for o in obs if o.vuln_class == "secret_exposure"]
     assert secrets
@@ -86,7 +86,7 @@ async def test_fingerprint_adapter_identifies_tech() -> None:
     )
     obs = await _run_native(
         FingerprintAdapter(),
-        _request("sentinel-fingerprint", [Capability.FINGERPRINT_TECH], url),
+        _request("vantage-fingerprint", [Capability.FINGERPRINT_TECH], url),
         client,
     )
     techs = {e.data.get("technology") for o in obs for e in o.evidence}
@@ -184,35 +184,35 @@ pytestmark = pytest.mark.asyncio
 
 
 async def test_local_subprocess_runner_runs_binary() -> None:
-    from sentinel.domain import NetworkMode, ResourceLimits
-    from sentinel.engines.adapter import ContainerSpec
-    from sentinel.engines.sandbox import LocalSubprocessRunner
+    from vantage.domain import NetworkMode, ResourceLimits
+    from vantage.engines.adapter import ContainerSpec
+    from vantage.engines.sandbox import LocalSubprocessRunner
 
     runner = LocalSubprocessRunner()
     assert await runner.available()
     spec = ContainerSpec(
         image="",
-        args=["sentinel-local-test"],
+        args=["vantage-local-test"],
         network=NetworkMode.NONE,
         limits=ResourceLimits(timeout_seconds=10),
         binary="echo",
     )
     result = await runner.run(spec)
     assert result.exit_code == 0
-    assert b"sentinel-local-test" in result.stdout
+    assert b"vantage-local-test" in result.stdout
 
 
 async def test_local_subprocess_runner_missing_binary() -> None:
-    from sentinel.domain import NetworkMode, ResourceLimits
-    from sentinel.engines.adapter import ContainerSpec
-    from sentinel.engines.sandbox import LocalSubprocessRunner
+    from vantage.domain import NetworkMode, ResourceLimits
+    from vantage.engines.adapter import ContainerSpec
+    from vantage.engines.sandbox import LocalSubprocessRunner
 
     spec = ContainerSpec(
         image="",
         args=[],
         network=NetworkMode.NONE,
         limits=ResourceLimits(),
-        binary="sentinel-nonexistent-binary-xyz",
+        binary="vantage-nonexistent-binary-xyz",
     )
     result = await LocalSubprocessRunner().run(spec)
     assert result.exit_code == 127
@@ -220,7 +220,7 @@ async def test_local_subprocess_runner_missing_binary() -> None:
 
 
 async def test_detect_engines_reports_known_set() -> None:
-    from sentinel.engines.detect import detect_engines
+    from vantage.engines.detect import detect_engines
 
     dets = await detect_engines(["nuclei", "ffuf"])
     ids = {d.engine_id for d in dets}
@@ -230,7 +230,7 @@ async def test_detect_engines_reports_known_set() -> None:
 
 
 async def test_katana_adapter_parses_endpoints() -> None:
-    from sentinel.adapters.oss.katana import KatanaAdapter
+    from vantage.adapters.oss.katana import KatanaAdapter
 
     rec = json.dumps({"request": {"endpoint": "https://h.example.com/api/x", "method": "GET"}})
     runner = FakeSandboxRunner(lambda spec: _sandbox_stdout(rec))
@@ -245,7 +245,7 @@ async def test_katana_adapter_parses_endpoints() -> None:
 
 
 async def test_httpx_adapter_parses_tech() -> None:
-    from sentinel.adapters.oss.httpx_engine import HttpxAdapter
+    from vantage.adapters.oss.httpx_engine import HttpxAdapter
 
     rec = json.dumps({"url": "https://h.example.com/", "tech": ["nginx", "PHP"]})
     runner = FakeSandboxRunner(lambda spec: _sandbox_stdout(rec))
@@ -260,7 +260,7 @@ async def test_httpx_adapter_parses_tech() -> None:
 
 
 async def test_feroxbuster_adapter_parses_responses() -> None:
-    from sentinel.adapters.oss.feroxbuster import FeroxbusterAdapter
+    from vantage.adapters.oss.feroxbuster import FeroxbusterAdapter
 
     rec = json.dumps({"type": "response", "url": "https://h.example.com/secret", "status": 403})
     runner = FakeSandboxRunner(lambda spec: _sandbox_stdout(rec))

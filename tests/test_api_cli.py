@@ -5,15 +5,15 @@ from __future__ import annotations
 from fastapi.testclient import TestClient
 from typer.testing import CliRunner
 
-from sentinel.api.app import create_api
-from sentinel.app import SentinelApp
-from sentinel.cli.main import app as cli_app
+from vantage.api.app import create_api
+from vantage.app import VantageApp
+from vantage.cli.main import app as cli_app
 
 runner = CliRunner()
 
 
 def _api_client() -> TestClient:
-    sapp = SentinelApp.build(bind_oss=False, validate_findings=False)
+    sapp = VantageApp.build(bind_oss=False, validate_findings=False)
     return TestClient(create_api(sapp, tenant="test"))
 
 
@@ -31,7 +31,7 @@ def test_engines_endpoint_lists_governed_engines() -> None:
     engines = {e["id"]: e for e in r.json()}
     assert engines["trufflehog"]["license_class"] == "RED"
     assert engines["trufflehog"]["usable"] is False
-    assert engines["sentinel-headers"]["usable"] is True
+    assert engines["vantage-headers"]["usable"] is True
 
 
 def test_scan_requires_authorization() -> None:
@@ -63,7 +63,7 @@ def test_scan_flow_authorized() -> None:
 def test_cli_version() -> None:
     result = runner.invoke(cli_app, ["version"])
     assert result.exit_code == 0
-    assert "Sentinel DAST" in result.stdout
+    assert "Vantage DAST" in result.stdout
 
 
 def test_cli_license_check_passes() -> None:

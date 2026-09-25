@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Install Sentinel DAST on an existing Kali Linux / Debian host and enable the
+# Install Vantage DAST on an existing Kali Linux / Debian host and enable the
 # security engines that are already installed natively.
 #
-# Sentinel runs the engines as native binaries (LocalSubprocessRunner). Only
+# Vantage runs the engines as native binaries (LocalSubprocessRunner). Only
 # permissively licensed (GREEN) engines are installed by this script; GPL/AGPL
 # tools that ship with Kali are intentionally left for a separate, reviewed
 # decision (see docs/architecture/engine-architecture.md).
@@ -13,7 +13,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WITH_ENGINES="${1:-}"
 
-echo "[*] Installing Sentinel DAST from ${REPO_ROOT}"
+echo "[*] Installing Vantage DAST from ${REPO_ROOT}"
 
 if ! command -v python3 >/dev/null 2>&1; then
   echo "[*] Installing Python..."
@@ -37,22 +37,22 @@ python3 -m venv "${REPO_ROOT}/.venv"
 "${REPO_ROOT}/.venv/bin/pip" install "${REPO_ROOT}"
 
 echo "[*] Verifying license policy (build gate)..."
-"${REPO_ROOT}/.venv/bin/sentinel" license check
+"${REPO_ROOT}/.venv/bin/vantage" license check
 
 echo "[*] Detecting installed engines..."
-"${REPO_ROOT}/.venv/bin/sentinel" engine detect || true
+"${REPO_ROOT}/.venv/bin/vantage" engine detect || true
 
 cat <<EOF
 
-[+] Sentinel DAST installed.
+[+] Vantage DAST installed.
 
     Run a scan using natively-installed Kali tools:
-      ${REPO_ROOT}/.venv/bin/sentinel scan https://target.you.own/ \\
+      ${REPO_ROOT}/.venv/bin/vantage scan https://target.you.own/ \\
           --authorize --sandbox local --profile standard
 
     Start the API control plane (local engines):
-      SENTINEL_SANDBOX=local SENTINEL_AUTODETECT=1 \\
-        ${REPO_ROOT}/.venv/bin/uvicorn sentinel.api.app:app --host 0.0.0.0 --port 8080
+      VANTAGE_SANDBOX=local VANTAGE_AUTODETECT=1 \\
+        ${REPO_ROOT}/.venv/bin/uvicorn vantage.api.app:app --host 0.0.0.0 --port 8080
 
     Only scan systems you own or are explicitly authorized to test.
 EOF

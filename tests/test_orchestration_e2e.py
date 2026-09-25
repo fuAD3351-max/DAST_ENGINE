@@ -8,12 +8,12 @@ from __future__ import annotations
 
 import pytest
 
-from sentinel.adapters.http import FakeHttpClient, FetchResult
-from sentinel.adapters.native.crawler import CrawlerAdapter
-from sentinel.adapters.native.fingerprint import FingerprintAdapter
-from sentinel.adapters.native.headers import HeadersAdapter
-from sentinel.adapters.native.validator import ValidatorAdapter
-from sentinel.domain import (
+from vantage.adapters.http import FakeHttpClient, FetchResult
+from vantage.adapters.native.crawler import CrawlerAdapter
+from vantage.adapters.native.fingerprint import FingerprintAdapter
+from vantage.adapters.native.headers import HeadersAdapter
+from vantage.adapters.native.validator import ValidatorAdapter
+from vantage.domain import (
     AuthorizationMethod,
     AuthorizationRecord,
     Scan,
@@ -23,13 +23,13 @@ from sentinel.domain import (
     Target,
     utcnow,
 )
-from sentinel.engines.registry import EngineRegistry
-from sentinel.findings import reporting
-from sentinel.governance.policy import LicensePolicy
-from sentinel.persistence.repositories import Database
-from sentinel.scan.orchestrator import Orchestrator
-from sentinel.scan.validation import Prober, ProbeResponse
-from sentinel.scope.engine import default_scope_rules_for
+from vantage.engines.registry import EngineRegistry
+from vantage.findings import reporting
+from vantage.governance.policy import LicensePolicy
+from vantage.persistence.repositories import Database
+from vantage.scan.orchestrator import Orchestrator
+from vantage.scan.validation import Prober, ProbeResponse
+from vantage.scope.engine import default_scope_rules_for
 
 pytestmark = pytest.mark.asyncio
 
@@ -116,7 +116,7 @@ async def test_full_scan_produces_validated_correlated_findings() -> None:
     assert len(stored) == len(report.findings)
 
     # Reports render in all formats.
-    assert "Sentinel DAST report" in reporting.to_markdown(report)
+    assert "Vantage DAST report" in reporting.to_markdown(report)
     assert '"version": "2.1.0"' in reporting.to_sarif(report)
     assert reporting.to_json(report)
 

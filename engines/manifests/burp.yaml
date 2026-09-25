@@ -1,4 +1,4 @@
-# Proprietary. Sentinel ships only the API client; customer hosts+licenses Burp.
+# Proprietary. Vantage ships only the API client; customer hosts+licenses Burp.
 id: burp
 name: Burp Suite (external)
 vendor: PortSwigger
@@ -9,5 +9,5 @@ capabilities:
 - audit.active
 - audit.passive
 - crawl.http
-adapter: sentinel.adapters.external.burp:BurpAdapter
+adapter: vantage.adapters.external.burp:BurpAdapter
 enabled: false

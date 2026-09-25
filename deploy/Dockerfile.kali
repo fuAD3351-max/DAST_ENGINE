@@ -1,18 +1,18 @@
-# Sentinel DAST all-in-one image on Kali Rolling.
+# Vantage DAST all-in-one image on Kali Rolling.
 #
-# Kali packages the security engines, so this image installs Sentinel plus the
+# Kali packages the security engines, so this image installs Vantage plus the
 # GREEN (permissively licensed) engines as native binaries and runs them via the
 # LocalSubprocessRunner. Only permissive engines are installed here; GPL/AGPL
 # engines available in Kali are deliberately NOT installed, matching the license
 # policy (they require a recorded review and isolated packaging before use).
 #
-# Build:  docker build -f deploy/Dockerfile.kali -t sentinel-dast:kali .
-# Run:    docker run --rm -p 8080:8080 sentinel-dast:kali
+# Build:  docker build -f deploy/Dockerfile.kali -t vantage-dast:kali .
+# Run:    docker run --rm -p 8080:8080 vantage-dast:kali
 FROM kalilinux/kali-rolling
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
-    SENTINEL_SANDBOX=local
+    VANTAGE_SANDBOX=local
 
 # Python runtime + GREEN engines available as Kali packages. If a package is
 # unavailable in a given Kali snapshot the build still succeeds for the rest.
@@ -36,5 +36,5 @@ RUN nuclei -update-templates || true
 
 EXPOSE 8080
 # On startup, detection enables whichever engines the image actually installed.
-ENV SENTINEL_AUTODETECT=1
-ENTRYPOINT ["uvicorn", "sentinel.api.app:app", "--host", "0.0.0.0", "--port", "8080"]
+ENV VANTAGE_AUTODETECT=1
+ENTRYPOINT ["uvicorn", "vantage.api.app:app", "--host", "0.0.0.0", "--port", "8080"]

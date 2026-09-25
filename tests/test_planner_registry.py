@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from sentinel.domain import ApplicationKind, Capability, ScanPolicy, ScanProfile
-from sentinel.engines.registry import EngineRegistry
-from sentinel.governance.policy import LicensePolicy
-from sentinel.planner.planner import PlannerConfig, ScanPlanner
+from vantage.domain import ApplicationKind, Capability, ScanPolicy, ScanProfile
+from vantage.engines.registry import EngineRegistry
+from vantage.governance.policy import LicensePolicy
+from vantage.planner.planner import PlannerConfig, ScanPlanner
 
 POLICY = "third_party/policy/license-policy.yaml"
 MANIFESTS = "engines/manifests"
@@ -26,7 +26,7 @@ def test_registry_blocks_gpl_engines() -> None:
 
 def test_registry_native_engines_approved() -> None:
     reg = registry()
-    for eid in ("sentinel-headers", "sentinel-tls", "sentinel-crawler"):
+    for eid in ("vantage-headers", "vantage-tls", "vantage-crawler"):
         eng = reg.get(eid)
         assert eng is not None
         assert eng.usable
@@ -78,8 +78,8 @@ def test_planner_merges_multi_capability_engine_into_one_task() -> None:
     plan = ScanPlanner(reg, PlannerConfig()).plan(
         _target(ApplicationKind.UNKNOWN), ScanPolicy(profile=ScanProfile.STANDARD), ["https://x/"]
     )
-    # sentinel-headers covers headers+secrets+passive; it should appear once.
-    header_tasks = [t for s in plan.stages for t in s.tasks if t.engine_id == "sentinel-headers"]
+    # vantage-headers covers headers+secrets+passive; it should appear once.
+    header_tasks = [t for s in plan.stages for t in s.tasks if t.engine_id == "vantage-headers"]
     assert len(header_tasks) == 1
     assert len(header_tasks[0].capabilities) >= 2
 
@@ -88,7 +88,7 @@ def test_planner_merges_multi_capability_engine_into_one_task() -> None:
 
 
 def _target(kind: ApplicationKind):
-    from sentinel.domain import AuthorizationMethod, AuthorizationRecord, Target, utcnow
+    from vantage.domain import AuthorizationMethod, AuthorizationRecord, Target, utcnow
 
     return Target(
         tenant_id="t",
@@ -102,11 +102,11 @@ def _target(kind: ApplicationKind):
 
 
 def _bind_fakes(reg: EngineRegistry) -> None:
-    from sentinel.adapters.native.crawler import CrawlerAdapter
-    from sentinel.adapters.native.fingerprint import FingerprintAdapter
-    from sentinel.adapters.native.headers import HeadersAdapter
-    from sentinel.adapters.native.tls import TlsAdapter
-    from sentinel.adapters.native.validator import ValidatorAdapter
+    from vantage.adapters.native.crawler import CrawlerAdapter
+    from vantage.adapters.native.fingerprint import FingerprintAdapter
+    from vantage.adapters.native.headers import HeadersAdapter
+    from vantage.adapters.native.tls import TlsAdapter
+    from vantage.adapters.native.validator import ValidatorAdapter
 
     for a in (
         HeadersAdapter(),

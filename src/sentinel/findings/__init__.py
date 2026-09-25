@@ -1,1 +1,0 @@
-"""Sentinel findings subsystem."""

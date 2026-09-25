@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from sentinel.domain import (
+from vantage.domain import (
     AuthorizationMethod,
     AuthorizationRecord,
     ScopeRule,
@@ -10,7 +10,7 @@ from sentinel.domain import (
     Target,
     utcnow,
 )
-from sentinel.scope.engine import ScopeEngine, default_scope_rules_for
+from vantage.scope.engine import ScopeEngine, default_scope_rules_for
 
 
 def _target(rules: list[ScopeRule], authorized: bool = True) -> Target:

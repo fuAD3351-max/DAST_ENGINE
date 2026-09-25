@@ -7,6 +7,6 @@ license: AGPL-3.0-only
 integration: container_cli
 capabilities:
 - analysis.secrets
-adapter: sentinel.adapters.oss.trufflehog:TruffleHogAdapter
+adapter: vantage.adapters.oss.trufflehog:TruffleHogAdapter
 enabled: false
 image: docker.io/trufflesecurity/trufflehog:3.82.13@sha256:b0d4d7051229875a2bfd9809c631c9899748f0e1fc6f408a446048dc6b60ca20

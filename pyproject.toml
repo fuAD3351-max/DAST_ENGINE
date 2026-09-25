@@ -3,15 +3,15 @@ requires = ["setuptools>=69", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "sentinel-dast"
+name = "vantage-dast"
 version = "0.1.0"
-description = "Sentinel DAST - unified, license-governed dynamic application security testing platform"
+description = "Vantage DAST - unified, license-governed dynamic application security testing platform"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "LicenseRef-Sentinel-Proprietary" }
-authors = [{ name = "Sentinel DAST Engineering" }]
+license = { text = "LicenseRef-Vantage-Proprietary" }
+authors = [{ name = "Vantage DAST Engineering" }]
 # Every runtime dependency below must also appear in
-# third_party/inventory/third_party_inventory.yaml; `sentinel license check`
+# third_party/inventory/third_party_inventory.yaml; `vantage license check`
 # fails the build otherwise.
 dependencies = [
   "pydantic>=2.7,<3",
@@ -36,13 +36,13 @@ dev = [
 postgres = ["psycopg[binary]>=3.1,<4"]
 
 [project.scripts]
-sentinel = "sentinel.cli.main:app"
+vantage = "vantage.cli.main:app"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-sentinel = ["py.typed"]
+vantage = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -64,6 +64,6 @@ ignore = ["S101"]
 [tool.mypy]
 python_version = "3.11"
 strict = true
-packages = ["sentinel"]
+packages = ["vantage"]
 mypy_path = "src"
 plugins = ["pydantic.mypy"]

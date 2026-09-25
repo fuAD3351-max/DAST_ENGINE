@@ -11,6 +11,6 @@ capabilities:
 - crawl.http
 - crawl.browser
 - discovery.content
-adapter: sentinel.adapters.oss.zap:ZapAdapter
+adapter: vantage.adapters.oss.zap:ZapAdapter
 enabled: false
 image: ghcr.io/zaproxy/zaproxy:2.16.1@sha256:b4c5ae2ae961fe88d12821bdf945b15482ef021703e1f900ccbe1a27f22df07f

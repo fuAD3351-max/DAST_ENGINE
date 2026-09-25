@@ -1,7 +1,7 @@
-id: sentinel-fingerprint
-name: Sentinel Technology Fingerprint
-vendor: Sentinel DAST
-license: LicenseRef-Sentinel-Proprietary
+id: vantage-fingerprint
+name: Vantage Technology Fingerprint
+vendor: Vantage DAST
+license: LicenseRef-Vantage-Proprietary
 integration: native
 capabilities: [fingerprint.tech]
-adapter: sentinel.adapters.native.fingerprint:FingerprintAdapter
+adapter: vantage.adapters.native.fingerprint:FingerprintAdapter

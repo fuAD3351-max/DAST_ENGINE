@@ -1,7 +1,7 @@
-id: sentinel-tls
-name: Sentinel TLS Analyzer
-vendor: Sentinel DAST
-license: LicenseRef-Sentinel-Proprietary
+id: vantage-tls
+name: Vantage TLS Analyzer
+vendor: Vantage DAST
+license: LicenseRef-Vantage-Proprietary
 integration: native
 capabilities: [analysis.tls]
-adapter: sentinel.adapters.native.tls:TlsAdapter
+adapter: vantage.adapters.native.tls:TlsAdapter

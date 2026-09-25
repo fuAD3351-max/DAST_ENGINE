@@ -8,6 +8,6 @@ integration: container_cli
 capabilities:
 - audit.api.rest
 - discovery.api_spec
-adapter: sentinel.adapters.oss.schemathesis:SchemathesisAdapter
+adapter: vantage.adapters.oss.schemathesis:SchemathesisAdapter
 enabled: false
 image: docker.io/schemathesis/schemathesis:4.28.0@sha256:ec66c0be6ebd917bd5221a965472ea65b2e9cf8def0c0d21a8988271e30848b4

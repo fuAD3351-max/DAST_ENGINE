@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import pytest
 
-from sentinel.domain import (
+from vantage.domain import (
     AuthorizationMethod,
     AuthorizationRecord,
     Target,
     utcnow,
 )
-from sentinel.scope.engine import default_scope_rules_for
+from vantage.scope.engine import default_scope_rules_for
 
 
 @pytest.fixture

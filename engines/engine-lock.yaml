@@ -1,4 +1,4 @@
-# Sentinel engine lock file - see header in the original; digests below are
+# Vantage engine lock file - see header in the original; digests below are
 # PLACEHOLDERS and must be resolved to real digests before release.
 engines:
   nuclei:
@@ -11,21 +11,21 @@ engines:
     image_digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
     license: MIT
     verified_date: '2026-09-25'
-  sentinel-fingerprint:
+  vantage-fingerprint:
     version: 0.1.0
-    license: LicenseRef-Sentinel-Proprietary
-  sentinel-headers:
+    license: LicenseRef-Vantage-Proprietary
+  vantage-headers:
     version: 0.1.0
-    license: LicenseRef-Sentinel-Proprietary
-  sentinel-tls:
+    license: LicenseRef-Vantage-Proprietary
+  vantage-tls:
     version: 0.1.0
-    license: LicenseRef-Sentinel-Proprietary
-  sentinel-crawler:
+    license: LicenseRef-Vantage-Proprietary
+  vantage-crawler:
     version: 0.1.0
-    license: LicenseRef-Sentinel-Proprietary
-  sentinel-validator:
+    license: LicenseRef-Vantage-Proprietary
+  vantage-validator:
     version: 0.1.0
-    license: LicenseRef-Sentinel-Proprietary
+    license: LicenseRef-Vantage-Proprietary
   zap:
     version: 2.16.1
     license: Apache-2.0
