@@ -46,7 +46,7 @@ vantage = "vantage.cli.main:app"
 where = ["src"]
 
 [tool.setuptools.package-data]
-vantage = ["py.typed"]
+vantage = ["py.typed", "api/static/*.html"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -64,6 +64,16 @@ def create_api(vantage_app: Any | None = None, *, tenant: str = "default") -> Fa
             state["app"] = VantageApp.from_env()
         return state["app"]
 
+    @api.get("/", include_in_schema=False)
+    @api.get("/ui", include_in_schema=False)
+    def console() -> Any:
+        from importlib.resources import files
+
+        from fastapi.responses import HTMLResponse
+
+        html = (files("vantage.api") / "static" / "console.html").read_text(encoding="utf-8")
+        return HTMLResponse(html)
+
     @api.get("/health")
     def health() -> dict[str, str]:
         return {"status": "ok", "version": __version__}

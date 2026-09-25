@@ -84,6 +84,19 @@ vantage scan https://target.you.own/ --authorize --sandbox local
 
 Or all-in-one container: `docker build -f deploy/Dockerfile.kali -t vantage:kali . && docker run -p 8080:8080 vantage:kali`.
 
+## Web console (UI)
+
+Vantage ships a self-contained web console served by the control plane — no
+build step, no CDN, works air-gapped. Start the API and open it:
+
+```bash
+uvicorn vantage.api.app:app --host 0.0.0.0 --port 8080
+# then browse to http://127.0.0.1:8080/  (also at /ui)
+```
+It shows the license-governed engine registry, lets you create authorized
+targets and launch scans, and renders findings with severity, risk, and the
+Proof-of-Vulnerability verdict per finding (with a "Confirmed only" toggle).
+
 ## Control plane (API)
 
 ```bash
@@ -138,7 +151,7 @@ src/vantage/
   findings/     taxonomy, correlation, risk, reporting, proof (evidence bundles)
   knowledge/    request knowledge base (dedup)
   persistence/  SQLAlchemy models + repositories
-  api/          FastAPI control plane
+  api/          FastAPI control plane + web console (api/static/console.html)
   cli/          Typer CLI
   ai/           on-prem LLM providers + analyst (above the engines)
   config.py     persisted AI model/provider selection
