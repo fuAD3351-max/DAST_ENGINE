@@ -18,6 +18,7 @@ Two implementations are provided:
 from __future__ import annotations
 
 import asyncio
+import inspect
 import shutil
 from collections.abc import Awaitable, Callable
 
@@ -30,7 +31,7 @@ class FakeSandboxRunner(SandboxRunner):
 
     def __init__(
         self,
-        handler: Callable[[ContainerSpec], Awaitable[SandboxResult]] | None = None,
+        handler: Callable[[ContainerSpec], Awaitable[SandboxResult] | SandboxResult] | None = None,
     ) -> None:
         self._handler = handler
 
@@ -39,7 +40,10 @@ class FakeSandboxRunner(SandboxRunner):
 
     async def run(self, spec: ContainerSpec) -> SandboxResult:
         if self._handler is not None:
-            return await self._handler(spec)
+            result = self._handler(spec)
+            if inspect.isawaitable(result):
+                return await result
+            return result
         return SandboxResult(
             exit_code=0,
             timed_out=False,

@@ -28,8 +28,17 @@ from sentinel.persistence.models import (
 
 
 def make_engine(url: str = "sqlite+pysqlite:///:memory:", echo: bool = False) -> Engine:
-    connect_args = {"check_same_thread": False} if url.startswith("sqlite") else {}
-    return create_engine(url, echo=echo, future=True, connect_args=connect_args)
+    connect_args: dict[str, object] = {}
+    kwargs: dict[str, object] = {"echo": echo, "future": True}
+    if url.startswith("sqlite"):
+        connect_args["check_same_thread"] = False
+        if ":memory:" in url or url in ("sqlite://", "sqlite+pysqlite://"):
+            # A single shared connection so every thread/session sees the same
+            # in-memory database (used by the API TestClient and embedded mode).
+            from sqlalchemy.pool import StaticPool
+
+            kwargs["poolclass"] = StaticPool
+    return create_engine(url, connect_args=connect_args, **kwargs)
 
 
 def create_all(engine: Engine) -> None:
