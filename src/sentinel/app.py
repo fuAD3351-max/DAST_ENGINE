@@ -66,6 +66,21 @@ class SentinelApp:
     policy: LicensePolicy
 
     @classmethod
+    def from_env(cls) -> SentinelApp:
+        """Build from environment variables (used by the container entrypoints).
+
+        SENTINEL_DATABASE_URL, SENTINEL_SANDBOX (auto|docker|local|fake),
+        SENTINEL_AUTODETECT (1/0). Defaults match an on-host/Kali deployment.
+        """
+        import os
+
+        return cls.build(
+            database_url=os.environ.get("SENTINEL_DATABASE_URL", "sqlite+pysqlite:///:memory:"),
+            sandbox_mode=os.environ.get("SENTINEL_SANDBOX", "auto"),
+            auto_detect=os.environ.get("SENTINEL_AUTODETECT", "0") in ("1", "true", "yes"),
+        )
+
+    @classmethod
     def build(
         cls,
         *,

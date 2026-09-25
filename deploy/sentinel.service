@@ -1,0 +1,27 @@
+# systemd unit for the Sentinel DAST control plane on a Linux/Kali host.
+# Install: copy to /etc/systemd/system/, adjust paths/user, then:
+#   systemctl daemon-reload && systemctl enable --now sentinel
+[Unit]
+Description=Sentinel DAST control plane
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=sentinel
+WorkingDirectory=/opt/sentinel-dast
+Environment=SENTINEL_SANDBOX=local
+Environment=SENTINEL_AUTODETECT=1
+Environment=SENTINEL_DATABASE_URL=sqlite+pysqlite:////opt/sentinel-dast/var/sentinel.db
+ExecStart=/opt/sentinel-dast/.venv/bin/uvicorn sentinel.api.app:app --host 0.0.0.0 --port 8080
+Restart=on-failure
+RestartSec=5
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/sentinel-dast/var
+
+[Install]
+WantedBy=multi-user.target

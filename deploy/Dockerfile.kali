@@ -1,0 +1,40 @@
+# Sentinel DAST all-in-one image on Kali Rolling.
+#
+# Kali packages the security engines, so this image installs Sentinel plus the
+# GREEN (permissively licensed) engines as native binaries and runs them via the
+# LocalSubprocessRunner. Only permissive engines are installed here; GPL/AGPL
+# engines available in Kali are deliberately NOT installed, matching the license
+# policy (they require a recorded review and isolated packaging before use).
+#
+# Build:  docker build -f deploy/Dockerfile.kali -t sentinel-dast:kali .
+# Run:    docker run --rm -p 8080:8080 sentinel-dast:kali
+FROM kalilinux/kali-rolling
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    SENTINEL_SANDBOX=local
+
+# Python runtime + GREEN engines available as Kali packages. If a package is
+# unavailable in a given Kali snapshot the build still succeeds for the rest.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        python3 python3-pip python3-venv ca-certificates git \
+        nuclei ffuf feroxbuster \
+    && apt-get install -y --no-install-recommends katana httpx-toolkit || true \
+    && apt-get install -y --no-install-recommends subfinder dnsx gitleaks || true \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY pyproject.toml README.md ./
+COPY src ./src
+COPY engines ./engines
+COPY third_party ./third_party
+COPY deploy/wordlists ./wordlists
+RUN pip install --break-system-packages --no-cache-dir .
+
+# Update Nuclei templates at build time (network permitting); safe to skip.
+RUN nuclei -update-templates || true
+
+EXPOSE 8080
+# On startup, detection enables whichever engines the image actually installed.
+ENV SENTINEL_AUTODETECT=1
+ENTRYPOINT ["uvicorn", "sentinel.api.app:app", "--host", "0.0.0.0", "--port", "8080"]

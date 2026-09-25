@@ -61,7 +61,7 @@ def create_api(sentinel_app: Any | None = None, *, tenant: str = "default") -> F
 
     def app_() -> Any:
         if state["app"] is None:
-            state["app"] = SentinelApp.build()
+            state["app"] = SentinelApp.from_env()
         return state["app"]
 
     @api.get("/health")
