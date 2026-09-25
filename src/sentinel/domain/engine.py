@@ -100,7 +100,7 @@ class EngineRunRequest(SentinelModel):
     scan_id: str
     tenant_id: str
     engine_id: Identifier
-    capability: Capability
+    capabilities: list[Capability] = Field(min_length=1)
     seed_urls: list[str] = Field(min_length=1)
     scope_rules: list[dict[str, Any]] = Field(default_factory=list)
     max_requests_per_second: float = Field(default=10.0, gt=0)

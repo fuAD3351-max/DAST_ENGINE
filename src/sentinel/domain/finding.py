@@ -149,6 +149,9 @@ class UnifiedFinding(SentinelModel):
     endpoint: str = Field(description="Normalized path template, e.g. /api/users/{id}")
     method: str | None = None
     parameter: str | None = None
+    affected_urls: list[str] = Field(
+        default_factory=list, description="Concrete URLs behind a templated/site-wide finding"
+    )
     description: str = ""
     remediation: str = ""
     references: list[str] = Field(default_factory=list)

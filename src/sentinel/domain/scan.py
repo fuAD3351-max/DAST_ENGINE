@@ -65,7 +65,7 @@ class StageKind(StrEnum):
 class PlannedTask(SentinelModel):
     id: str = Field(default_factory=new_id)
     engine_id: str
-    capability: Capability
+    capabilities: list[Capability] = Field(min_length=1)
     seed_urls: list[str]
     options: dict[str, Any] = Field(default_factory=dict)
     reason: str = Field(description="Why the planner chose this engine (explainability)")
