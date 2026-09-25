@@ -202,26 +202,25 @@ def _detect_installed(engine_ids: list[str]) -> set[str]:
 
 
 def build_ai_provider_from_env() -> LLMProvider | None:
-    """Construct a local LLM provider from environment variables, or None.
+    """Construct a local LLM provider from resolved config, or None.
 
-    All providers are on-premise: llama_cpp runs in-process from a local GGUF;
-    ollama talks to a self-hosted daemon on localhost. Nothing leaves the host.
+    Settings come from the persisted config (``vantage ai select``) overridden by
+    VANTAGE_AI_* environment variables. All providers are on-premise: llama_cpp
+    runs in-process from a local GGUF; ollama talks to a self-hosted daemon on
+    localhost. Nothing leaves the host.
     """
-    import os
-
     from vantage.ai.models import get as get_model
     from vantage.ai.provider import LlamaCppProvider, OllamaProvider
+    from vantage.config import resolve_ai_settings
 
-    kind = os.environ.get("VANTAGE_AI_PROVIDER", "none").lower()
-    model_id = os.environ.get("VANTAGE_AI_MODEL", "qwen2.5:7b-instruct")
-    info = get_model(model_id)
+    cfg = resolve_ai_settings()
+    kind = cfg.provider.lower()
+    info = get_model(cfg.model)
     lic = info.license_spdx if info else "unknown"
     if kind == "llama_cpp":
-        path = os.environ.get("VANTAGE_AI_MODEL_PATH", "")
-        if not path:
+        if not cfg.model_path:
             return None
-        return LlamaCppProvider(path, model_id=model_id, model_license=lic)
+        return LlamaCppProvider(cfg.model_path, model_id=cfg.model, model_license=lic)
     if kind == "ollama":
-        base = os.environ.get("VANTAGE_AI_OLLAMA_URL", "http://127.0.0.1:11434")
-        return OllamaProvider(model_id=model_id, base_url=base, model_license=lic)
+        return OllamaProvider(model_id=cfg.model, base_url=cfg.ollama_url, model_license=lic)
     return None

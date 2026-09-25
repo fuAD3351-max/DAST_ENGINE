@@ -1,0 +1,280 @@
+{
+  "$defs": {
+    "ApplicationKind": {
+      "enum": [
+        "unknown",
+        "traditional_web",
+        "spa",
+        "rest_api",
+        "graphql_api",
+        "soap_api",
+        "websocket"
+      ],
+      "title": "ApplicationKind",
+      "type": "string"
+    },
+    "AuthorizationMethod": {
+      "description": "How the tenant proved it may test the target.",
+      "enum": [
+        "dns_txt",
+        "http_file",
+        "signed_attestation",
+        "internal_asset"
+      ],
+      "title": "AuthorizationMethod",
+      "type": "string"
+    },
+    "AuthorizationRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "expires_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expires At"
+        },
+        "method": {
+          "$ref": "#/$defs/AuthorizationMethod"
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Ticket / contract / token id",
+          "title": "Reference"
+        },
+        "verified_at": {
+          "format": "date-time",
+          "title": "Verified At",
+          "type": "string"
+        },
+        "verified_by": {
+          "minLength": 1,
+          "title": "Verified By",
+          "type": "string"
+        }
+      },
+      "required": [
+        "method",
+        "verified_at",
+        "verified_by"
+      ],
+      "title": "AuthorizationRecord",
+      "type": "object"
+    },
+    "RateLimits": {
+      "additionalProperties": false,
+      "description": "Traffic ceilings enforced by the orchestrator for every engine.",
+      "properties": {
+        "max_concurrency": {
+          "default": 4,
+          "maximum": 256,
+          "minimum": 1,
+          "title": "Max Concurrency",
+          "type": "integer"
+        },
+        "max_requests_per_second": {
+          "default": 10.0,
+          "exclusiveMinimum": 0,
+          "maximum": 1000,
+          "title": "Max Requests Per Second",
+          "type": "number"
+        },
+        "max_total_requests": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Total Requests"
+        }
+      },
+      "title": "RateLimits",
+      "type": "object"
+    },
+    "ScopeRule": {
+      "additionalProperties": false,
+      "description": "One include/exclude rule. Excludes always win over includes.\n\n``host`` accepts an exact hostname, a ``*.example.com`` wildcard (subdomains\nonly, not the apex), an IP address, or a CIDR block.",
+      "properties": {
+        "host": {
+          "maxLength": 253,
+          "minLength": 1,
+          "title": "Host",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/ScopeRuleKind",
+          "default": "include"
+        },
+        "methods": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Methods"
+        },
+        "path_prefix": {
+          "default": "/",
+          "title": "Path Prefix",
+          "type": "string"
+        },
+        "path_regex": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Path Regex"
+        },
+        "ports": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ports"
+        },
+        "schemes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Schemes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "host"
+      ],
+      "title": "ScopeRule",
+      "type": "object"
+    },
+    "ScopeRuleKind": {
+      "enum": [
+        "include",
+        "exclude"
+      ],
+      "title": "ScopeRuleKind",
+      "type": "string"
+    }
+  },
+  "$id": "https://vantage.example/contracts/target.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "api_definitions": {
+      "description": "OpenAPI/GraphQL/WSDL locations (URL or artifact ref)",
+      "items": {
+        "type": "string"
+      },
+      "title": "Api Definitions",
+      "type": "array"
+    },
+    "authorization": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AuthorizationRecord"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "base_urls": {
+      "items": {
+        "format": "uri",
+        "maxLength": 2083,
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Base Urls",
+      "type": "array"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "kind": {
+      "$ref": "#/$defs/ApplicationKind",
+      "default": "unknown"
+    },
+    "name": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "rate_limits": {
+      "$ref": "#/$defs/RateLimits"
+    },
+    "scope_rules": {
+      "items": {
+        "$ref": "#/$defs/ScopeRule"
+      },
+      "title": "Scope Rules",
+      "type": "array"
+    },
+    "tags": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Tags",
+      "type": "array"
+    },
+    "tenant_id": {
+      "title": "Tenant Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "name",
+    "base_urls"
+  ],
+  "title": "Target",
+  "type": "object",
+  "x-vantage-version": "0.1.0"
+}

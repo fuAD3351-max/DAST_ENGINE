@@ -1,0 +1,164 @@
+{
+  "$defs": {
+    "EvidenceKind": {
+      "enum": [
+        "http_exchange",
+        "response_match",
+        "dom_observation",
+        "oob_interaction",
+        "tls_observation",
+        "header_observation",
+        "validation_result",
+        "note"
+      ],
+      "title": "EvidenceKind",
+      "type": "string"
+    },
+    "HttpMessage": {
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Body"
+        },
+        "body_truncated": {
+          "default": false,
+          "title": "Body Truncated",
+          "type": "boolean"
+        },
+        "headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Headers",
+          "type": "object"
+        },
+        "method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Method"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        }
+      },
+      "title": "HttpMessage",
+      "type": "object"
+    }
+  },
+  "$id": "https://vantage.example/contracts/evidence.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifact_refs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Artifact Refs",
+      "type": "array"
+    },
+    "captured_at": {
+      "format": "date-time",
+      "title": "Captured At",
+      "type": "string"
+    },
+    "data": {
+      "additionalProperties": true,
+      "title": "Data",
+      "type": "object"
+    },
+    "engine_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_.:-]+$",
+      "title": "Engine Id",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "kind": {
+      "$ref": "#/$defs/EvidenceKind"
+    },
+    "matched": {
+      "description": "Matched strings/markers",
+      "items": {
+        "type": "string"
+      },
+      "title": "Matched",
+      "type": "array"
+    },
+    "request": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/HttpMessage"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "response": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/HttpMessage"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "summary": {
+      "maxLength": 2000,
+      "title": "Summary",
+      "type": "string"
+    }
+  },
+  "required": [
+    "kind",
+    "engine_id",
+    "summary"
+  ],
+  "title": "Evidence",
+  "type": "object",
+  "x-vantage-version": "0.1.0"
+}

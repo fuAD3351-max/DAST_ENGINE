@@ -281,6 +281,89 @@ def ai_models(
     )
 
 
+@ai_app.command("select")
+def ai_select(
+    model: Annotated[str | None, typer.Option(help="Model id (see 'vantage ai models')")] = None,
+    provider: Annotated[
+        str | None, typer.Option(help="Provider: ollama | llama_cpp | none")
+    ] = None,
+    model_path: Annotated[str | None, typer.Option(help="GGUF path (llama_cpp)")] = None,
+    ollama_url: Annotated[str | None, typer.Option(help="Ollama base URL")] = None,
+    accept_yellow: Annotated[
+        bool, typer.Option("--accept-yellow", help="Allow a review-gated (YELLOW) model")
+    ] = False,
+) -> None:
+    """Choose the on-premise AI model and provider, and persist the choice.
+
+    With no --model, it lists the recommended commercially-licensed models and
+    asks you to pick one interactively. The choice is saved to the Vantage config
+    and used by future scans (env vars still override it).
+    """
+    from vantage.ai import models as m
+    from vantage.config import VantageConfig
+    from vantage.domain.common import LicenseClass
+
+    green = m.recommended(LicenseClass.GREEN)
+
+    if model is None:
+        typer.echo("Recommended on-premise models (commercially-licensed, run locally):\n")
+        for i, x in enumerate(green, 1):
+            default = "  (default)" if x.id == m.DEFAULT_MODEL_ID else ""
+            typer.echo(f"  {i}. {x.id:24} {x.params:5} {x.license_spdx}{default}")
+        typer.echo("")
+        choice = typer.prompt("Select a model by number (or type a model id)", default="1")
+        if choice.strip().isdigit():
+            idx = int(choice) - 1
+            if not (0 <= idx < len(green)):
+                typer.secho("Invalid selection.", fg=typer.colors.RED)
+                raise typer.Exit(code=2)
+            model = green[idx].id
+        else:
+            model = choice.strip()
+
+    info = m.get(model)
+    if info is None:
+        typer.secho(
+            f"Unknown model '{model}'. Run 'vantage ai models --all' to see options.",
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(code=2)
+    if info.license_class is LicenseClass.YELLOW and not accept_yellow:
+        typer.secho(
+            f"'{model}' is license class YELLOW ({info.license_spdx}) — it carries usage "
+            "restrictions and needs a recorded review before commercial use. Re-run with "
+            "--accept-yellow to select it anyway.",
+            fg=typer.colors.YELLOW,
+        )
+        raise typer.Exit(code=2)
+
+    cfg = VantageConfig.load()
+    cfg.ai.model = model
+    if provider is not None:
+        cfg.ai.provider = provider.lower()
+    elif cfg.ai.provider == "none":
+        # Pick a sensible provider if the user hasn't chosen one yet.
+        cfg.ai.provider = "ollama"
+    if model_path is not None:
+        cfg.ai.model_path = model_path
+    if ollama_url is not None:
+        cfg.ai.ollama_url = ollama_url
+    path = cfg.save()
+
+    typer.secho(
+        f"Selected {model} ({info.license_spdx}, {info.license_class.value}) via "
+        f"provider '{cfg.ai.provider}'.",
+        fg=typer.colors.GREEN,
+    )
+    typer.echo(f"Saved to {path}.")
+    if cfg.ai.provider == "llama_cpp" and not cfg.ai.model_path:
+        typer.secho(
+            "llama_cpp selected but no --model-path set; provide a GGUF path before scanning.",
+            fg=typer.colors.YELLOW,
+        )
+    typer.echo("Enable it on a scan with: vantage scan <url> --authorize --ai")
+
+
 @ai_app.command("info")
 def ai_info() -> None:
     """Show the configured on-premise AI provider/model and its availability."""
@@ -365,8 +448,8 @@ def scan_run(
     ai_provider = build_ai_provider_from_env() if ai else None
     if ai and ai_provider is None:
         typer.secho(
-            "--ai set but no AI provider configured; set VANTAGE_AI_PROVIDER "
-            "(ollama|llama_cpp). Continuing without AI.",
+            "--ai set but no on-prem AI model is configured. Run 'vantage ai select' to "
+            "choose one (or set VANTAGE_AI_PROVIDER=ollama|llama_cpp). Continuing without AI.",
             fg=typer.colors.YELLOW,
         )
     sapp = VantageApp.build(

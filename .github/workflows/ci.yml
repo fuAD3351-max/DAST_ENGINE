@@ -30,6 +30,40 @@ jobs:
       - name: Pytest
         run: pytest -q
 
+  go-components:
+    name: Go components (egress proxy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - name: Vet
+        working-directory: components/egress-proxy
+        run: go vet ./...
+      - name: Build
+        working-directory: components/egress-proxy
+        run: go build ./...
+      - name: Test
+        working-directory: components/egress-proxy
+        run: go test ./...
+
+  contracts:
+    name: Contracts up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -e .
+      - name: Regenerate contracts and check for drift
+        run: |
+          python scripts/gen_contracts.py
+          git diff --exit-code contracts/ \
+            || (echo "contracts/ is stale — run: python scripts/gen_contracts.py" && exit 1)
+
   license-gate:
     name: License policy gate
     runs-on: ubuntu-latest

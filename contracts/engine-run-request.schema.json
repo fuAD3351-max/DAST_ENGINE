@@ -1,0 +1,136 @@
+{
+  "$defs": {
+    "Capability": {
+      "description": "Product-level capabilities. The planner selects engines by capability,\nnever by engine name, so engines stay replaceable.",
+      "enum": [
+        "crawl.http",
+        "crawl.browser",
+        "discovery.content",
+        "discovery.js",
+        "discovery.api_spec",
+        "discovery.subdomain",
+        "recon.http",
+        "fingerprint.tech",
+        "analysis.tls",
+        "analysis.dns",
+        "analysis.headers",
+        "analysis.secrets",
+        "audit.passive",
+        "audit.active",
+        "audit.templates",
+        "audit.api.rest",
+        "audit.api.graphql",
+        "audit.api.soap",
+        "audit.websocket",
+        "audit.authz",
+        "oob.callback",
+        "validation"
+      ],
+      "title": "Capability",
+      "type": "string"
+    }
+  },
+  "$id": "https://vantage.example/contracts/engine-run-request.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Everything an adapter needs to run one engine against one scope slice.\n\nAdapters never receive database handles or credentials beyond what is in\n``auth_context``; the orchestrator owns persistence.",
+  "properties": {
+    "auth_context": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Session material produced by the Authentication Manager",
+      "title": "Auth Context"
+    },
+    "capabilities": {
+      "items": {
+        "$ref": "#/$defs/Capability"
+      },
+      "minItems": 1,
+      "title": "Capabilities",
+      "type": "array"
+    },
+    "engine_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_.:-]+$",
+      "title": "Engine Id",
+      "type": "string"
+    },
+    "max_concurrency": {
+      "default": 4,
+      "minimum": 1,
+      "title": "Max Concurrency",
+      "type": "integer"
+    },
+    "max_requests_per_second": {
+      "default": 10.0,
+      "exclusiveMinimum": 0,
+      "title": "Max Requests Per Second",
+      "type": "number"
+    },
+    "options": {
+      "additionalProperties": true,
+      "title": "Options",
+      "type": "object"
+    },
+    "proxy_url": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Scope-enforcing egress proxy the engine must use",
+      "title": "Proxy Url"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "scan_id": {
+      "title": "Scan Id",
+      "type": "string"
+    },
+    "scope_rules": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Scope Rules",
+      "type": "array"
+    },
+    "seed_urls": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Seed Urls",
+      "type": "array"
+    },
+    "tenant_id": {
+      "title": "Tenant Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "scan_id",
+    "tenant_id",
+    "engine_id",
+    "capabilities",
+    "seed_urls"
+  ],
+  "title": "EngineRunRequest",
+  "type": "object",
+  "x-vantage-version": "0.1.0"
+}

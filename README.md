@@ -108,7 +108,14 @@ CI (`.github/workflows/ci.yml`) runs lint, format, strict types, tests, the
 
 ## Layout
 
+Vantage is **polyglot** (see `docs/architecture/language-strategy.md`): a Python
+control plane, a Go egress proxy, and engines in Go/Java/Rust/Python — all
+speaking the language-agnostic JSON-Schema contracts in `contracts/`.
+
 ```
+contracts/      language-agnostic JSON-Schema (generated from the models)
+components/
+  egress-proxy/ Go scope-enforcing forward proxy (stdlib only) + tests
 src/vantage/
   domain/       shared contracts (targets, scans, engines, findings)
   scope/        authorized-target scope engine
@@ -122,6 +129,8 @@ src/vantage/
   persistence/  SQLAlchemy models + repositories
   api/          FastAPI control plane
   cli/          Typer CLI
+  ai/           on-prem LLM providers + analyst (above the engines)
+  config.py     persisted AI model/provider selection
 engines/manifests/  one YAML per engine   engines/engine-lock.yaml  pinned versions/digests
 third_party/        policy, inventory, licenses, notices, SBOM
 deploy/             Dockerfiles, compose, Kali installer, systemd

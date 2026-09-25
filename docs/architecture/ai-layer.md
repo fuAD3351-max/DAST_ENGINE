@@ -58,6 +58,14 @@ the chosen model as a third-party component (`third_party/inventory`).
   management. No code dependency.
 - (vLLM, Apache-2.0, is a supported future backend for GPU serving.)
 
+## Choosing a model
+
+The solution asks which model to use: run `vantage ai select` for an interactive
+picker over the commercially-licensed catalog (YELLOW models require
+`--accept-yellow`). The choice is persisted to the Vantage config and used by
+future scans; `VANTAGE_AI_*` env vars override it. `vantage ai models` lists the
+catalog; `vantage ai info` shows the active choice and availability.
+
 ## Install / enable
 
 **Ollama (simplest, on-prem):**

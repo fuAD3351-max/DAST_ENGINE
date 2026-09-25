@@ -1,0 +1,88 @@
+{
+  "$defs": {
+    "ScopeRuleKind": {
+      "enum": [
+        "include",
+        "exclude"
+      ],
+      "title": "ScopeRuleKind",
+      "type": "string"
+    }
+  },
+  "$id": "https://vantage.example/contracts/scope-rule.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "One include/exclude rule. Excludes always win over includes.\n\n``host`` accepts an exact hostname, a ``*.example.com`` wildcard (subdomains\nonly, not the apex), an IP address, or a CIDR block.",
+  "properties": {
+    "host": {
+      "maxLength": 253,
+      "minLength": 1,
+      "title": "Host",
+      "type": "string"
+    },
+    "kind": {
+      "$ref": "#/$defs/ScopeRuleKind",
+      "default": "include"
+    },
+    "methods": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Methods"
+    },
+    "path_prefix": {
+      "default": "/",
+      "title": "Path Prefix",
+      "type": "string"
+    },
+    "path_regex": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Path Regex"
+    },
+    "ports": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Ports"
+    },
+    "schemes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Schemes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "host"
+  ],
+  "title": "ScopeRule",
+  "type": "object",
+  "x-vantage-version": "0.1.0"
+}
