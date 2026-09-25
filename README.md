@@ -53,6 +53,17 @@ python examples/run_demo.py --confirmed-only # only validated/corroborated findi
 Or point it at your own local target: `vantage scan http://127.0.0.1:3000/ --authorize`.
 See `docs/demo.md` (covers OWASP Juice Shop / DVWA too).
 
+## Install
+
+Full step-by-step Linux install: **[INSTALL.md](INSTALL.md)**. TL;DR:
+
+```bash
+git clone https://github.com/fuAD3351-max/DAST_ENGINE.git && cd DAST_ENGINE
+python3 -m venv .venv && source .venv/bin/activate
+pip install .
+vantage version && vantage license check
+```
+
 ## Quick start
 
 ```bash
