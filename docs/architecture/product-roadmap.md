@@ -49,10 +49,14 @@ reporting (JSON/SARIF/Markdown ✅), CI/CD (SARIF + exit codes ✅), SSO, deploy
 automation (Docker/Kali/compose/systemd ✅). Remaining: RBAC/SSO, worker queue,
 object storage for artifacts, air-gapped update channel.
 
-## Phase 9 — AI ☐
-Local-LLM layer **above** deterministic engines: endpoint classification,
-finding grouping/explanation, prioritization, likely-false-positive hints. Hard
-rule: AI must not invent evidence; it annotates deterministic results only.
+## Phase 9 — AI ◑ (on-prem layer delivered)
+Local-LLM layer **above** deterministic engines: finding prioritization,
+explanation, grouping and likely-false-positive triage — all fully on-prem
+(llama.cpp in-process or self-hosted Ollama), off by default. Hard rule enforced
+in code: AI annotates deterministic findings only, drops hallucinated ids, and
+never invents findings or evidence. Default model Qwen2.5-7B-Instruct
+(Apache-2.0); see `ai-layer.md`. Remaining: endpoint classification pre-scan,
+retrieval over past scans, GPU (vLLM) serving backend.
 
 ## Deployment targets (available now)
 - **On-prem / private cloud:** `deploy/docker-compose.yml` (control plane +

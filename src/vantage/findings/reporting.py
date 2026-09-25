@@ -46,6 +46,25 @@ def to_json(report: ScanReport) -> str:
         },
         "findings": [f.model_dump(mode="json") for f in report.findings],
     }
+    if report.ai is not None and report.ai.enabled:
+        payload["ai"] = {
+            "provider": report.ai.provider,
+            "model": report.ai.model,
+            "model_license": report.ai.model_license,
+            "groups": report.ai.groups,
+            "notes": report.ai.notes,
+            "annotations": {
+                fid: {
+                    "priority_rank": a.priority_rank,
+                    "likely_false_positive": a.likely_false_positive,
+                    "explanation": a.explanation,
+                    "remediation": a.remediation,
+                    "group_id": a.group_id,
+                    "rationale": a.rationale,
+                }
+                for fid, a in report.ai.annotations.items()
+            },
+        }
     return json.dumps(payload, indent=2, default=str)
 
 
@@ -126,6 +145,15 @@ def to_markdown(report: ScanReport) -> str:
         lines.append(f"- Skipped capabilities: {len(report.skipped_capabilities)}")
     lines.append("")
 
+    ai = report.ai
+    if ai is not None and ai.enabled:
+        lines.append(
+            f"- AI assist: **{ai.provider}/{ai.model}** ({ai.model_license}) — "
+            f"{len(ai.annotations)} annotated, {len(ai.groups)} group(s). "
+            "_AI is advisory; it annotates deterministic findings and never adds evidence._"
+        )
+        lines.append("")
+
     if not report.findings:
         lines.append("_No findings._")
         return "\n".join(lines)
@@ -161,6 +189,12 @@ def to_markdown(report: ScanReport) -> str:
             lines.append(f"- **Description:** {f.description}")
         if f.remediation:
             lines.append(f"- **Remediation:** {f.remediation}")
+        ann = report.ai.annotations.get(f.id) if report.ai and report.ai.enabled else None
+        if ann is not None:
+            if ann.likely_false_positive:
+                lines.append("- **AI (advisory):** flagged as a *likely false positive* — verify.")
+            if ann.explanation:
+                lines.append(f"- **AI explanation (advisory):** {ann.explanation}")
     return "\n".join(lines)
 
 

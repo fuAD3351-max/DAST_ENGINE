@@ -26,6 +26,7 @@ detection behind a uniform adapter boundary:
 - **Correlation Engine** — merges multi-engine observations into one unified finding.
 - **Risk Engine** — deterministic, explainable 0–100 scoring.
 - **License Governance** — a build gate that blocks GPL/AGPL/commercial code from being embedded.
+- **On-prem AI layer** — a local LLM (Qwen2.5/Qwen3 Apache-2.0 via llama.cpp or Ollama) *above* the engines that prioritizes, explains and triages findings; annotates only, never invents evidence; off by default.
 
 Engines are selected by **capability**, so any engine can be swapped without
 touching planning, correlation, risk or reporting.

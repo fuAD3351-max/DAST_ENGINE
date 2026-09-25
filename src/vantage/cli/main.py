@@ -31,8 +31,10 @@ app = typer.Typer(
 )
 engine_app = typer.Typer(help="Engine registry operations.", no_args_is_help=True)
 license_app = typer.Typer(help="License governance operations.", no_args_is_help=True)
+ai_app = typer.Typer(help="On-premise AI layer operations.", no_args_is_help=True)
 app.add_typer(engine_app, name="engine")
 app.add_typer(license_app, name="license")
+app.add_typer(ai_app, name="ai")
 
 DEFAULT_POLICY = "third_party/policy/license-policy.yaml"
 DEFAULT_INVENTORY = "third_party/inventory/third_party_inventory.yaml"
@@ -228,6 +230,81 @@ def engine_verify(
         typer.secho(f"{problems} engine problem(s) require attention.", fg=typer.colors.YELLOW)
 
 
+@ai_app.command("models")
+def ai_models(
+    all_classes: Annotated[bool, typer.Option("--all", help="Include review-gated models")] = False,
+    json_out: Annotated[bool, typer.Option("--json")] = False,
+) -> None:
+    """List recommended on-premise LLMs for managing DAST activity, license-classed.
+
+    All run fully local (llama.cpp in-process, or a self-hosted Ollama daemon) —
+    nothing leaves the deployment. GREEN = commercially usable; YELLOW = review.
+    """
+    from vantage.ai import models as m
+    from vantage.domain.common import LicenseClass
+
+    catalog = m.recommended(None) if all_classes else m.recommended(LicenseClass.GREEN)
+    if json_out:
+        typer.echo(
+            json.dumps(
+                [
+                    {
+                        "id": x.id,
+                        "family": x.family,
+                        "params": x.params,
+                        "license": x.license_spdx,
+                        "license_class": x.license_class.value,
+                        "context": x.context,
+                        "gguf": x.gguf_hint,
+                        "default": x.id == m.DEFAULT_MODEL_ID,
+                        "notes": x.notes,
+                    }
+                    for x in catalog
+                ],
+                indent=2,
+            )
+        )
+        return
+    typer.echo(f"{'MODEL':26} {'PARAMS':7} {'LICENSE':14} {'CLASS':7} GGUF")
+    for x in catalog:
+        colour = {"GREEN": typer.colors.GREEN, "YELLOW": typer.colors.YELLOW}.get(
+            x.license_class.value, typer.colors.WHITE
+        )
+        tag = "  (default)" if x.id == m.DEFAULT_MODEL_ID else ""
+        row = f"{x.id:26} {x.params:7} {x.license_spdx:14} {x.license_class.value:7} {x.gguf_hint}"
+        typer.secho(row + tag, fg=colour)
+    typer.echo(
+        "\nEnable on-prem AI, e.g.:\n"
+        "  Ollama:    VANTAGE_AI_PROVIDER=ollama VANTAGE_AI_MODEL=qwen2.5:7b-instruct\n"
+        "  llama.cpp: pip install 'vantage-dast[ai]'; VANTAGE_AI_PROVIDER=llama_cpp "
+        "VANTAGE_AI_MODEL_PATH=/models/qwen2.5-7b-instruct-q4_k_m.gguf"
+    )
+
+
+@ai_app.command("info")
+def ai_info() -> None:
+    """Show the configured on-premise AI provider/model and its availability."""
+    import asyncio
+
+    from vantage.app import build_ai_provider_from_env
+
+    provider = build_ai_provider_from_env()
+    if provider is None:
+        typer.echo("AI provider: none (deterministic engines only).")
+        typer.echo("Set VANTAGE_AI_PROVIDER=ollama|llama_cpp to enable the on-prem AI layer.")
+        return
+    available = asyncio.run(provider.available())
+    typer.echo(f"AI provider: {provider.name}")
+    typer.echo(f"Model:       {provider.model_id}")
+    typer.echo(f"License:     {provider.model_license}")
+    typer.secho(
+        f"Available:   {available}",
+        fg=typer.colors.GREEN if available else typer.colors.YELLOW,
+    )
+    if not available:
+        typer.echo("(Model/runtime not reachable — install the model or start the daemon.)")
+
+
 @app.command("scan")
 def scan_run(
     url: Annotated[list[str], typer.Argument(help="Base URL(s) to scan")],
@@ -247,6 +324,10 @@ def scan_run(
         str,
         typer.Option(help="Engine execution: auto|docker|local|fake (local = Kali/host binaries)"),
     ] = "auto",
+    ai: Annotated[
+        bool,
+        typer.Option("--ai", help="Enable the on-prem AI layer (uses VANTAGE_AI_* config)"),
+    ] = False,
 ) -> None:
     """Run a scan against target(s) you are authorized to test."""
     if not authorize:
@@ -277,12 +358,22 @@ def scan_run(
         typer.secho(f"Unknown profile: {profile}", fg=typer.colors.RED)
         raise typer.Exit(code=2) from None
 
+    from vantage.app import build_ai_provider_from_env
+
     # In local (Kali/host) mode, auto-detect installed tools so the planner can
     # decide which of the natively-installed engines to use per target.
+    ai_provider = build_ai_provider_from_env() if ai else None
+    if ai and ai_provider is None:
+        typer.secho(
+            "--ai set but no AI provider configured; set VANTAGE_AI_PROVIDER "
+            "(ollama|llama_cpp). Continuing without AI.",
+            fg=typer.colors.YELLOW,
+        )
     sapp = VantageApp.build(
         bind_oss=not no_oss,
         sandbox_mode=sandbox,
         auto_detect=(sandbox.lower() == "local"),
+        ai_provider=ai_provider,
     )
     target = Target(
         tenant_id="cli",

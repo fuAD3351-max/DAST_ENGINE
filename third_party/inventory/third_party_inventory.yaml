@@ -169,6 +169,37 @@ components:
     approval_reference: "GREEN/isolated-container"
     notes: "Content discovery; unmodified upstream image, run in the sandbox."
 
+  # ---- On-premise AI layer (optional; only when AI is enabled) -------------
+  - name: llama-cpp-python
+    version: ">=0.3,<1"
+    repository: https://github.com/abetlen/llama-cpp-python
+    license: MIT
+    copyright: "Copyright (c) 2023 Andrei Betlen"
+    integration_type: library_dynamic
+    dynamic_linking: true
+    redistribution_allowed: true
+    commercial_risk: low
+    approval_status: approved
+    approval_reference: "GREEN/optional-ai-extra"
+    notes: "In-process local LLM inference (llama.cpp). Optional 'ai' extra; not installed by default."
+
+  - name: Qwen2.5-7B-Instruct
+    version: "GGUF"
+    repository: https://huggingface.co/Qwen/Qwen2.5-7B-Instruct
+    license: Apache-2.0
+    copyright: "Copyright (c) Alibaba Cloud / Qwen team"
+    integration_type: content
+    modification_required: false
+    redistribution_allowed: true
+    commercial_risk: low
+    approval_status: approved
+    approval_reference: "GREEN/on-prem-model-default"
+    notes: >-
+      Default on-prem AI model (weights obtained separately by the operator, run
+      locally). Apache-2.0, commercial use permitted at 7B with no user cap.
+      Alternatives: Qwen3 / Mistral-7B (Apache-2.0), Phi-4-mini (MIT).
+      Llama/Gemma models carry usage restrictions (YELLOW) - review before use.
+
   # ---- Build / dev toolchain (not redistributed in the product) ------------
   - name: pytest
     version: ">=8"

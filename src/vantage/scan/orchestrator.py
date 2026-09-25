@@ -18,6 +18,7 @@ import logging
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 
+from vantage.ai.analyst import AiAssessment, SecurityAnalyst
 from vantage.domain import (
     Capability,
     EngineRunRequest,
@@ -78,6 +79,7 @@ class ScanReport:
     engines_failed: list[str]
     skipped_capabilities: list[str]
     stats: dict[str, object] = field(default_factory=dict)
+    ai: AiAssessment | None = None
 
 
 class Orchestrator:
@@ -91,6 +93,7 @@ class Orchestrator:
         prober_factory: ProberFactory | None = None,
         planner_config: PlannerConfig | None = None,
         validate_findings: bool = True,
+        analyst: SecurityAnalyst | None = None,
     ) -> None:
         self._db = db
         self._registry = registry
@@ -99,6 +102,8 @@ class Orchestrator:
         self._risk = risk_engine or RiskEngine()
         self._prober_factory = prober_factory
         self._validate = validate_findings
+        # AI layer sits ABOVE deterministic results; default is a no-op analyst.
+        self._analyst = analyst or SecurityAnalyst()
 
     def _set_state(self, scan: Scan, dst: ScanState, reason: str | None = None) -> Scan:
         if scan.state is dst:
@@ -190,6 +195,12 @@ class Orchestrator:
         with self._db.unit_of_work() as uow:
             for f in findings:
                 uow.findings.upsert(f)
+
+        # AI layer (optional, on-prem): annotates deterministic findings only.
+        ai = await self._analyst.assess(findings)
+        if ai.enabled:
+            findings = self._analyst.prioritized_order(findings, ai)
+
         scan = self._set_state(scan, ScanState.COMPLETED, f"{len(findings)} findings")
 
         return ScanReport(
@@ -200,6 +211,7 @@ class Orchestrator:
             engines_failed=engines_failed,
             skipped_capabilities=plan.skipped,
             stats={"coverage_entries": len(kb)},
+            ai=ai,
         )
 
     async def _run_engine(

@@ -34,6 +34,10 @@ dev = [
   "types-PyYAML",
 ]
 postgres = ["psycopg[binary]>=3.1,<4"]
+# On-premise AI layer (optional). llama-cpp-python (MIT) runs a local GGUF model
+# fully in-process/air-gapped. The model weights are obtained separately by the
+# operator and tracked in the third-party inventory (default: Qwen2.5, Apache-2.0).
+ai = ["llama-cpp-python>=0.3,<1"]
 
 [project.scripts]
 vantage = "vantage.cli.main:app"

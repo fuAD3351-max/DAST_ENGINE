@@ -18,6 +18,8 @@ from vantage.adapters.native.fingerprint import FingerprintAdapter
 from vantage.adapters.native.headers import HeadersAdapter
 from vantage.adapters.native.tls import TlsAdapter
 from vantage.adapters.native.validator import ValidatorAdapter
+from vantage.ai.analyst import SecurityAnalyst
+from vantage.ai.provider import LLMProvider
 from vantage.domain import Target
 from vantage.engines.adapter import EngineAdapter, SandboxRunner
 from vantage.engines.registry import EngineRegistry
@@ -64,13 +66,17 @@ class VantageApp:
     registry: EngineRegistry
     orchestrator: Orchestrator
     policy: LicensePolicy
+    analyst: SecurityAnalyst | None = None
 
     @classmethod
     def from_env(cls) -> VantageApp:
         """Build from environment variables (used by the container entrypoints).
 
         VANTAGE_DATABASE_URL, VANTAGE_SANDBOX (auto|docker|local|fake),
-        VANTAGE_AUTODETECT (1/0). Defaults match an on-host/Kali deployment.
+        VANTAGE_AUTODETECT (1/0). AI (all on-prem, off by default):
+        VANTAGE_AI_PROVIDER (none|llama_cpp|ollama), VANTAGE_AI_MODEL,
+        VANTAGE_AI_MODEL_PATH (GGUF for llama_cpp). Defaults match an on-host/Kali
+        deployment with AI disabled.
         """
         import os
 
@@ -78,6 +84,7 @@ class VantageApp:
             database_url=os.environ.get("VANTAGE_DATABASE_URL", "sqlite+pysqlite:///:memory:"),
             sandbox_mode=os.environ.get("VANTAGE_SANDBOX", "auto"),
             auto_detect=os.environ.get("VANTAGE_AUTODETECT", "0") in ("1", "true", "yes"),
+            ai_provider=build_ai_provider_from_env(),
         )
 
     @classmethod
@@ -93,6 +100,7 @@ class VantageApp:
         bind_oss: bool = True,
         auto_detect: bool = False,
         validate_findings: bool = True,
+        ai_provider: LLMProvider | None = None,
     ) -> VantageApp:
         from vantage.persistence.repositories import Database
 
@@ -137,13 +145,15 @@ class VantageApp:
                 registry.bind_adapter(eid, factory())
 
         db = Database(database_url)
+        analyst = SecurityAnalyst(ai_provider) if ai_provider is not None else SecurityAnalyst()
         orchestrator = Orchestrator(
             db,
             registry,
             prober_factory=HttpProber,
             validate_findings=validate_findings,
+            analyst=analyst,
         )
-        return cls(registry=registry, orchestrator=orchestrator, policy=policy)
+        return cls(registry=registry, orchestrator=orchestrator, policy=policy, analyst=analyst)
 
 
 def _ver(registry: EngineRegistry, engine_id: str) -> str:
@@ -189,3 +199,29 @@ def _detect_installed(engine_ids: list[str]) -> set[str]:
 
     detections = asyncio.run(detect_engines(engine_ids))
     return {d.engine_id for d in detections if d.installed}
+
+
+def build_ai_provider_from_env() -> LLMProvider | None:
+    """Construct a local LLM provider from environment variables, or None.
+
+    All providers are on-premise: llama_cpp runs in-process from a local GGUF;
+    ollama talks to a self-hosted daemon on localhost. Nothing leaves the host.
+    """
+    import os
+
+    from vantage.ai.models import get as get_model
+    from vantage.ai.provider import LlamaCppProvider, OllamaProvider
+
+    kind = os.environ.get("VANTAGE_AI_PROVIDER", "none").lower()
+    model_id = os.environ.get("VANTAGE_AI_MODEL", "qwen2.5:7b-instruct")
+    info = get_model(model_id)
+    lic = info.license_spdx if info else "unknown"
+    if kind == "llama_cpp":
+        path = os.environ.get("VANTAGE_AI_MODEL_PATH", "")
+        if not path:
+            return None
+        return LlamaCppProvider(path, model_id=model_id, model_license=lic)
+    if kind == "ollama":
+        base = os.environ.get("VANTAGE_AI_OLLAMA_URL", "http://127.0.0.1:11434")
+        return OllamaProvider(model_id=model_id, base_url=base, model_license=lic)
+    return None
