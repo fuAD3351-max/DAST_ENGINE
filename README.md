@@ -26,7 +26,8 @@ detection behind a uniform adapter boundary:
 - **Correlation Engine** — merges multi-engine observations into one unified finding.
 - **Risk Engine** — deterministic, explainable 0–100 scoring.
 - **License Governance** — a build gate that blocks GPL/AGPL/commercial code from being embedded.
-- **On-prem AI layer** — a local LLM (Qwen2.5/Qwen3 Apache-2.0 via llama.cpp or Ollama) *above* the engines that prioritizes, explains and triages findings; annotates only, never invents evidence; off by default.
+- **On-prem AI layer** — a local LLM (Qwen2.5/Qwen3 Apache-2.0 via llama.cpp or Ollama) *above* the engines that prioritizes, explains and triages findings; annotates only, never invents evidence; installed with the product (`vantage ai install`).
+- **Proof-of-Vulnerability** — every finding carries a reproducible, tamper-evident (optionally HMAC-signed) evidence bundle with a verdict (confirmed/corroborated/reported/disputed); `--confirmed-only` gives the low-false-positive view. **This is the authentic result raw scanners don't provide** — see `docs/differentiators.md`.
 
 Engines are selected by **capability**, so any engine can be swapped without
 touching planning, correlation, risk or reporting.
@@ -114,6 +115,7 @@ speaking the language-agnostic JSON-Schema contracts in `contracts/`.
 
 ```
 contracts/      language-agnostic JSON-Schema (generated from the models)
+ai/             model-lock.yaml (pinned on-prem LLM installed with the product)
 components/
   egress-proxy/ Go scope-enforcing forward proxy (stdlib only) + tests
 src/vantage/
@@ -124,7 +126,7 @@ src/vantage/
   adapters/     native/ (first-party) · oss/ (isolated) · external/ (BYOL)
   planner/      capability-based scan planner
   scan/         orchestrator (state machine) + validation engine
-  findings/     taxonomy, correlation, risk, reporting
+  findings/     taxonomy, correlation, risk, reporting, proof (evidence bundles)
   knowledge/    request knowledge base (dedup)
   persistence/  SQLAlchemy models + repositories
   api/          FastAPI control plane

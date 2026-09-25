@@ -32,6 +32,7 @@ from vantage.domain import (
 from vantage.engines.adapter import EngineAdapter
 from vantage.engines.registry import EngineRegistry
 from vantage.findings.correlation import CorrelationEngine, merge_across_scans
+from vantage.findings.proof import ProofReport, build_proofs
 from vantage.findings.risk import RiskEngine
 from vantage.knowledge.base import RequestKnowledgeBase, coverage_key
 from vantage.persistence.repositories import Database
@@ -80,6 +81,7 @@ class ScanReport:
     skipped_capabilities: list[str]
     stats: dict[str, object] = field(default_factory=dict)
     ai: AiAssessment | None = None
+    proofs: ProofReport | None = None
 
 
 class Orchestrator:
@@ -94,6 +96,7 @@ class Orchestrator:
         planner_config: PlannerConfig | None = None,
         validate_findings: bool = True,
         analyst: SecurityAnalyst | None = None,
+        evidence_key: str | None = None,
     ) -> None:
         self._db = db
         self._registry = registry
@@ -104,6 +107,8 @@ class Orchestrator:
         self._validate = validate_findings
         # AI layer sits ABOVE deterministic results; default is a no-op analyst.
         self._analyst = analyst or SecurityAnalyst()
+        # Optional HMAC key for tamper-evident proof bundles (else digest only).
+        self._evidence_key = evidence_key
 
     def _set_state(self, scan: Scan, dst: ScanState, reason: str | None = None) -> Scan:
         if scan.state is dst:
@@ -201,6 +206,10 @@ class Orchestrator:
         if ai.enabled:
             findings = self._analyst.prioritized_order(findings, ai)
 
+        # Proof-of-Vulnerability bundles: reproducible, tamper-evident evidence
+        # per finding — the authentic result raw engines do not provide.
+        proofs = build_proofs(findings, signing_key=self._evidence_key)
+
         scan = self._set_state(scan, ScanState.COMPLETED, f"{len(findings)} findings")
 
         return ScanReport(
@@ -212,6 +221,7 @@ class Orchestrator:
             skipped_capabilities=plan.skipped,
             stats={"coverage_entries": len(kb)},
             ai=ai,
+            proofs=proofs,
         )
 
     async def _run_engine(

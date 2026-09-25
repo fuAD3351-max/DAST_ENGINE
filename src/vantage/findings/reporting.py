@@ -17,6 +17,7 @@ from collections import Counter
 from typing import Any
 
 from vantage.domain import Severity, UnifiedFinding
+from vantage.findings.proof import ProofOfVulnerability, ProofReport
 from vantage.scan.orchestrator import ScanReport
 
 _SARIF_LEVEL = {
@@ -46,6 +47,12 @@ def to_json(report: ScanReport) -> str:
         },
         "findings": [f.model_dump(mode="json") for f in report.findings],
     }
+    if report.proofs is not None:
+        payload["proofs"] = {
+            "signed": report.proofs.signed,
+            "confirmed_count": len(report.proofs.confirmed),
+            "bundles": [p.to_dict() for p in report.proofs.proofs],
+        }
     if report.ai is not None and report.ai.enabled:
         payload["ai"] = {
             "provider": report.ai.provider,
@@ -145,6 +152,15 @@ def to_markdown(report: ScanReport) -> str:
         lines.append(f"- Skipped capabilities: {len(report.skipped_capabilities)}")
     lines.append("")
 
+    if report.proofs is not None and report.findings:
+        confirmed = len(report.proofs.confirmed)
+        sig = " · signed (tamper-evident)" if report.proofs.signed else ""
+        lines.append(
+            f"- Proof: **{confirmed}/{len(report.findings)}** findings carry a "
+            f"confirmed/corroborated Proof-of-Vulnerability bundle{sig}"
+        )
+        lines.append("")
+
     ai = report.ai
     if ai is not None and ai.enabled:
         lines.append(
@@ -195,7 +211,42 @@ def to_markdown(report: ScanReport) -> str:
                 lines.append("- **AI (advisory):** flagged as a *likely false positive* — verify.")
             if ann.explanation:
                 lines.append(f"- **AI explanation (advisory):** {ann.explanation}")
+        proof = _proof_for(report, f.id)
+        if proof is not None:
+            lines.append(
+                f"- **Proof:** verdict **{proof.verdict}**"
+                + (" · signed" if proof.signed else "")
+                + f" · integrity `{proof.integrity_sha256[:12]}…`"
+            )
+            lines.append(f"  - Differential: {proof.differential}")
+            repro = "; ".join(f"{s.order}) {s.action}" for s in proof.reproduction)
+            lines.append(f"  - Reproduce: {repro}")
     return "\n".join(lines)
+
+
+def _proof_for(report: ScanReport, finding_id: str) -> ProofOfVulnerability | None:
+    if report.proofs is None:
+        return None
+    for p in report.proofs.proofs:
+        if p.finding_id == finding_id:
+            return p
+    return None
+
+
+def filter_confirmed(report: ScanReport) -> ScanReport:
+    """Return a copy of the report containing only findings whose proof verdict is
+    confirmed or corroborated — the low-false-positive view for stakeholders."""
+    from dataclasses import replace
+
+    if report.proofs is None:
+        return report
+    confirmed_ids = {p.finding_id for p in report.proofs.confirmed}
+    findings = [f for f in report.findings if f.id in confirmed_ids]
+    proofs = ProofReport(
+        proofs=[p for p in report.proofs.proofs if p.finding_id in confirmed_ids],
+        signed=report.proofs.signed,
+    )
+    return replace(report, findings=findings, proofs=proofs)
 
 
 def render(report: ScanReport, fmt: str) -> str:

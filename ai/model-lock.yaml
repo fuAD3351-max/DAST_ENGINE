@@ -1,0 +1,18 @@
+# Vantage AI model lock — the on-premise LLM shipped/installed with the product.
+#
+# The default is the most mature COMMERCIALLY-LICENSABLE local model: Qwen2.5-7B
+# -Instruct (Apache-2.0). `vantage ai install` reads this file to fetch and
+# verify the model during installation, and the installers call that command so
+# the model lands with the solution. Pin the exact GGUF sha256 before release
+# (the value below is a PLACEHOLDER); air-gapped installs stage the GGUF and
+# pass it with `--from`.
+default: qwen2.5-7b-instruct
+models:
+  qwen2.5-7b-instruct:
+    ollama_tag: "qwen2.5:7b-instruct"          # for the Ollama backend
+    gguf_repo: "Qwen/Qwen2.5-7B-Instruct-GGUF" # Hugging Face repo (llama.cpp backend)
+    gguf_file: "qwen2.5-7b-instruct-q4_k_m.gguf"
+    gguf_sha256: "REPLACE_WITH_PINNED_DIGEST_BEFORE_RELEASE"
+    license: Apache-2.0
+    size_hint: "~4.7 GB (Q4_K_M)"
+    verified_date: "2026-09-25"

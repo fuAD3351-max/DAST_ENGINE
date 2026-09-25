@@ -34,6 +34,16 @@ RUN pip install --break-system-packages --no-cache-dir .
 # Update Nuclei templates at build time (network permitting); safe to skip.
 RUN nuclei -update-templates || true
 
+# Bundle the on-premise AI model with the image (most mature commercially-
+# licensable model: Qwen2.5-7B-Instruct, Apache-2.0). Set BAKE_AI_MODEL=0 to
+# build a slim image and install the model at first run instead.
+ARG BAKE_AI_MODEL=1
+RUN if [ "$BAKE_AI_MODEL" = "1" ]; then \
+      (curl -fsSL https://ollama.com/install.sh | sh) && \
+      (ollama serve & sleep 5 && vantage ai install --backend ollama) || \
+      echo "AI model bake skipped (offline build); run 'vantage ai install' at deploy."; \
+    fi
+
 EXPOSE 8080
 # On startup, detection enables whichever engines the image actually installed.
 ENV VANTAGE_AUTODETECT=1

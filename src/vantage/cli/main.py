@@ -364,6 +364,57 @@ def ai_select(
     typer.echo("Enable it on a scan with: vantage scan <url> --authorize --ai")
 
 
+@ai_app.command("install")
+def ai_install(
+    backend: Annotated[str, typer.Option(help="auto | ollama | llama_cpp")] = "auto",
+    model_from: Annotated[
+        str | None, typer.Option("--from", help="Pre-staged GGUF path (air-gapped)")
+    ] = None,
+    dest_dir: Annotated[str, typer.Option(help="GGUF install directory")] = "/opt/vantage/models",
+    lock: Annotated[str, typer.Option(help="Model lock file")] = "ai/model-lock.yaml",
+    enable: Annotated[bool, typer.Option(help="Enable AI in config on success")] = True,
+) -> None:
+    """Install the on-premise LLM that ships with Vantage (the pinned model).
+
+    Installers call this so the model lands with the product. Uses Ollama when
+    present, otherwise a local GGUF (`--from` for air-gapped). On success the AI
+    config is enabled so scans use it by default.
+    """
+    import asyncio
+
+    from vantage.ai.install import install_model, load_locked_model
+    from vantage.config import VantageConfig
+
+    try:
+        locked = load_locked_model(lock)
+    except (OSError, KeyError) as exc:
+        typer.secho(f"Cannot read model lock: {exc}", fg=typer.colors.RED)
+        raise typer.Exit(code=2) from None
+
+    typer.echo(
+        f"Installing on-prem model '{locked.key}' ({locked.license}, {locked.size_hint}) "
+        f"via backend '{backend}'..."
+    )
+    result = asyncio.run(
+        install_model(lock_path=lock, backend=backend, gguf_from=model_from, gguf_dest_dir=dest_dir)
+    )
+    if not result.ok:
+        typer.secho(f"Not installed: {result.detail}", fg=typer.colors.YELLOW)
+        for step in result.steps:
+            typer.echo(f"  → {step}")
+        raise typer.Exit(code=1)
+
+    typer.secho(f"Installed ({result.backend}): {result.model}", fg=typer.colors.GREEN)
+    if enable:
+        cfg = VantageConfig.load()
+        cfg.ai.provider = result.backend
+        cfg.ai.model = locked.ollama_tag if result.backend == "ollama" else "qwen2.5:7b-instruct"
+        if result.backend == "llama_cpp":
+            cfg.ai.model_path = result.model
+        path = cfg.save()
+        typer.echo(f"AI enabled in config ({path}). Scans will use it by default.")
+
+
 @ai_app.command("info")
 def ai_info() -> None:
     """Show the configured on-premise AI provider/model and its availability."""
@@ -410,6 +461,13 @@ def scan_run(
     ai: Annotated[
         bool,
         typer.Option("--ai", help="Enable the on-prem AI layer (uses VANTAGE_AI_* config)"),
+    ] = False,
+    confirmed_only: Annotated[
+        bool,
+        typer.Option(
+            "--confirmed-only",
+            help="Report only findings with a confirmed/corroborated Proof-of-Vulnerability",
+        ),
     ] = False,
 ) -> None:
     """Run a scan against target(s) you are authorized to test."""
@@ -478,6 +536,8 @@ def scan_run(
     )
 
     report = asyncio.run(sapp.orchestrator.run(scan, target))
+    if confirmed_only:
+        report = reporting.filter_confirmed(report)
     rendered = reporting.render(report, fmt)
     if out:
         Path(out).write_text(rendered, encoding="utf-8")

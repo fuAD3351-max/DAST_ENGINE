@@ -42,6 +42,19 @@ echo "[*] Verifying license policy (build gate)..."
 echo "[*] Detecting installed engines..."
 "${REPO_ROOT}/.venv/bin/vantage" engine detect || true
 
+# Install the on-premise AI model with the solution (most mature commercially-
+# licensable model: Qwen2.5-7B-Instruct, Apache-2.0). Uses Ollama if present.
+if [[ "${VANTAGE_WITH_AI:-1}" == "1" ]]; then
+  if ! command -v ollama >/dev/null 2>&1; then
+    echo "[*] Installing Ollama (for the on-prem AI model)..."
+    curl -fsSL https://ollama.com/install.sh | sh || \
+      echo "    (Ollama install skipped; install manually to enable AI.)"
+  fi
+  echo "[*] Installing the pinned on-prem AI model..."
+  ( cd "${REPO_ROOT}" && "${REPO_ROOT}/.venv/bin/vantage" ai install --backend auto ) || \
+    echo "    (Model install deferred; run 'vantage ai install' later.)"
+fi
+
 cat <<EOF
 
 [+] Vantage DAST installed.
