@@ -234,14 +234,16 @@ class EngineRegistry:
         return self._engines.get(engine_id)
 
     # --- EngineCatalog protocol -------------------------------------------
+    # The planner sees only engines that are policy-clean AND have a bound
+    # adapter, so it never plans an engine that cannot actually run.
     def enabled_engines(self) -> list[EngineMetadata]:
-        return [e.metadata for e in self._engines.values() if e.usable]
+        return [e.metadata for e in self._engines.values() if e.usable and e.adapter is not None]
 
     def engines_for(self, capability: Capability) -> list[EngineMetadata]:
         return [
             e.metadata
             for e in self._engines.values()
-            if e.usable and capability in e.metadata.capabilities
+            if e.usable and e.adapter is not None and capability in e.metadata.capabilities
         ]
 
     def adapter_for(self, engine_id: str) -> EngineAdapter | None:
