@@ -273,3 +273,96 @@ async def test_feroxbuster_adapter_parses_responses() -> None:
     assert len(obs) == 1
     assert obs[0].location.path == "/secret"
     assert obs[0].severity is Severity.LOW
+
+
+async def test_zap_adapter_parses_report() -> None:
+    from vantage.adapters.oss.zap import ZapAdapter
+
+    report = json.dumps(
+        {
+            "site": [
+                {
+                    "@name": "https://h.example.com",
+                    "alerts": [
+                        {
+                            "name": "Cross Site Scripting (Reflected)",
+                            "riskcode": "3",
+                            "confidence": "3",
+                            "cweid": "79",
+                            "pluginid": "40012",
+                            "desc": "<p>xss</p>",
+                            "solution": "<p>encode</p>",
+                            "instances": [
+                                {"uri": "https://h.example.com/q", "method": "GET", "param": "q"}
+                            ],
+                        }
+                    ],
+                }
+            ]
+        }
+    )
+    runner = FakeSandboxRunner(lambda spec: _sandbox_files({"zap.json": report.encode()}))
+    adapter = ZapAdapter(runner, "2.16.1")
+    req = _request("zap", [Capability.AUDIT_ACTIVE], "https://h.example.com/")
+    prepared = await adapter.prepare_target(req)
+    outcome = await adapter.execute_scan(prepared)
+    raw = await adapter.collect_results(outcome)
+    obs = adapter.normalize_results(raw, req)
+    assert len(obs) == 1
+    assert obs[0].vuln_class == "xss"
+    assert obs[0].severity is Severity.HIGH
+    assert 79 in obs[0].cwe
+    assert obs[0].location.parameter == "q"
+    # ZAP high confidence maps to FIRM, never CONFIRMED.
+    assert obs[0].confidence.value == "firm"
+
+
+async def test_gitleaks_adapter_redacts_secret() -> None:
+    from vantage.adapters.oss.gitleaks import GitleaksAdapter
+
+    report = json.dumps(
+        [{"RuleID": "aws-access-key", "Secret": "AKIA1234567890ABCD", "File": "app.js"}]
+    )
+    runner = FakeSandboxRunner(lambda spec: _sandbox_files({"gitleaks.json": report.encode()}))
+    adapter = GitleaksAdapter(runner, "v8.21.2")
+    req = _request("gitleaks", [Capability.ANALYSIS_SECRETS], "https://h.example.com/")
+    prepared = await adapter.prepare_target(req)
+    outcome = await adapter.execute_scan(prepared)
+    raw = await adapter.collect_results(outcome)
+    obs = adapter.normalize_results(raw, req)
+    assert len(obs) == 1
+    assert obs[0].vuln_class == "secret_exposure"
+    assert all("*" in m for e in obs[0].evidence for m in e.matched)
+
+
+async def test_subfinder_adapter_parses_subdomains() -> None:
+    from vantage.adapters.oss.recon import SubfinderAdapter
+
+    lines = "\n".join(json.dumps({"host": h}) for h in ("a.example.com", "b.example.com"))
+    runner = FakeSandboxRunner(lambda spec: _sandbox_stdout(lines))
+    adapter = SubfinderAdapter(runner, "v2.6.8")
+    req = _request("subfinder", [Capability.DISCOVERY_SUBDOMAIN], "https://example.com/")
+    prepared = await adapter.prepare_target(req)
+    outcome = await adapter.execute_scan(prepared)
+    raw = await adapter.collect_results(outcome)
+    obs = adapter.normalize_results(raw, req)
+    assert {o.location.host for o in obs} == {"a.example.com", "b.example.com"}
+
+
+async def test_tlsx_adapter_flags_expired_and_weak() -> None:
+    from vantage.adapters.oss.recon import TlsxAdapter
+
+    rec = json.dumps(
+        {"host": "h.example.com", "port": 443, "expired": True, "tls_version": "tls10"}
+    )
+    runner = FakeSandboxRunner(lambda spec: _sandbox_stdout(rec))
+    adapter = TlsxAdapter(runner, "v1.1.9")
+    req = _request("tlsx", [Capability.ANALYSIS_TLS], "https://h.example.com/")
+    prepared = await adapter.prepare_target(req)
+    outcome = await adapter.execute_scan(prepared)
+    raw = await adapter.collect_results(outcome)
+    obs = adapter.normalize_results(raw, req)
+    classes = {o.detector_id for o in obs}
+    assert "cert-expired" in classes
+    assert any("weak-protocol" in c for c in classes)
+    assert all(o.vuln_class == "tls_weakness" for o in obs)

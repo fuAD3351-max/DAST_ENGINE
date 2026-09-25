@@ -30,6 +30,7 @@ _VERSION_PROBES: dict[str, tuple[str, list[str], str]] = {
     "gitleaks": ("gitleaks", ["version"], r"([0-9]+\.[0-9]+\.[0-9]+)"),
     "gau": ("gau", ["--version"], r"([0-9]+\.[0-9]+\.[0-9]+)"),
     "schemathesis": ("schemathesis", ["--version"], r"([0-9]+\.[0-9]+\.[0-9]+)"),
+    "zap": ("zap.sh", ["-version"], r"([0-9]+\.[0-9]+\.[0-9]+)"),
     # RED-licensed tools may exist on Kali; detection reports them but the
     # registry keeps them blocked until a recorded review approves them.
     "whatweb": ("whatweb", ["--version"], r"([0-9]+\.[0-9]+)"),

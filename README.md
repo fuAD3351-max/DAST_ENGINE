@@ -35,7 +35,7 @@ touching planning, correlation, risk or reporting.
 | Tier | Engines |
 |---|---|
 | Native (first-party) | crawler+JS, security headers/cookies/CORS, secret scan, TLS (cryptography), tech fingerprint, validation, correlation, risk |
-| Isolated GREEN (arms-length) | **Nuclei, ffuf, katana, httpx, feroxbuster** (shipped adapters); ZAP, gitleaks, subfinder, dnsx, tlsx, schemathesis, prism, interactsh (declared) |
+| Isolated GREEN (arms-length) | **Nuclei, ffuf, katana, httpx, feroxbuster, ZAP, gitleaks, subfinder, dnsx, tlsx** (shipped adapters); schemathesis, prism, interactsh (declared) |
 | Review-gated (YELLOW) | Semgrep (LGPL) — disabled until reviewed |
 | External (bring-your-own-license) | **Burp Suite** via the customer's own licensed instance (API client only) |
 | Blocked (RED) → replaced | trufflehog→gitleaks, sslyze/testssl→native TLS, wfuzz/dirsearch→ffuf/feroxbuster, whatweb→native+wappalyzergo, wapiti/w3af→ZAP+Nuclei |

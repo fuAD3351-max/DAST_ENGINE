@@ -249,11 +249,18 @@ class EngineRegistry:
         return [e.metadata for e in self._engines.values() if e.usable and e.adapter is not None]
 
     def engines_for(self, capability: Capability) -> list[EngineMetadata]:
-        return [
-            e.metadata
+        matches = [
+            e
             for e in self._engines.values()
             if e.usable and e.adapter is not None and capability in e.metadata.capabilities
         ]
+        # Preference order: first-party NATIVE engines first (reliable, no
+        # external dependency), then others. This makes Vantage use its own
+        # engines by default and reach for an isolated OSS engine only for a
+        # capability the native ones do not cover (e.g. browser crawl, template
+        # checks, active audit). Stable within each group.
+        matches.sort(key=lambda e: 0 if e.metadata.integration is IntegrationType.NATIVE else 1)
+        return [e.metadata for e in matches]
 
     def adapter_for(self, engine_id: str) -> EngineAdapter | None:
         eng = self._engines.get(engine_id)

@@ -9,5 +9,5 @@ capabilities:
 - recon.http
 - fingerprint.tech
 adapter: vantage.adapters.oss.httpx_engine:HttpxAdapter
-enabled: false
+enabled: true
 image: ghcr.io/projectdiscovery/httpx:v1.6.9@sha256:44c3f6f83c39094fec0db8b7f158d0a8fad3418e77f5f739b103e1ac73eee5d8

@@ -158,9 +158,12 @@ def _oss_adapter_factories(
     from vantage.adapters.oss.base import ContainerEngineAdapter
     from vantage.adapters.oss.feroxbuster import FeroxbusterAdapter
     from vantage.adapters.oss.ffuf import FfufAdapter
+    from vantage.adapters.oss.gitleaks import GitleaksAdapter
     from vantage.adapters.oss.httpx_engine import HttpxAdapter
     from vantage.adapters.oss.katana import KatanaAdapter
     from vantage.adapters.oss.nuclei import NucleiAdapter
+    from vantage.adapters.oss.recon import DnsxAdapter, SubfinderAdapter, TlsxAdapter
+    from vantage.adapters.oss.zap import ZapAdapter
 
     def mk(cls: type[ContainerEngineAdapter], eid: str) -> Callable[[], EngineAdapter]:
         return lambda: cls(runner, _ver(registry, eid))
@@ -171,6 +174,11 @@ def _oss_adapter_factories(
         "katana": mk(KatanaAdapter, "katana"),
         "httpx": mk(HttpxAdapter, "httpx"),
         "feroxbuster": mk(FeroxbusterAdapter, "feroxbuster"),
+        "zap": mk(ZapAdapter, "zap"),
+        "gitleaks": mk(GitleaksAdapter, "gitleaks"),
+        "subfinder": mk(SubfinderAdapter, "subfinder"),
+        "dnsx": mk(DnsxAdapter, "dnsx"),
+        "tlsx": mk(TlsxAdapter, "tlsx"),
     }
 
 

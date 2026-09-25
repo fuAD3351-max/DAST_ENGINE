@@ -38,12 +38,12 @@ Build/dev only (not redistributed): pytest, ruff, mypy — all MIT.
 | katana | v1.2.2 | MIT | GREEN | container_cli / local | adapter shipped |
 | httpx (PD) | v1.6.9 | MIT | GREEN | container_cli / local | adapter shipped |
 | feroxbuster | v2.11.0 | MIT | GREEN | container_cli / local | adapter shipped |
-| OWASP ZAP | 2.16.1 | Apache-2.0 | GREEN | container_api | declared |
+| OWASP ZAP | 2.16.1 | Apache-2.0 | GREEN | container_cli | **adapter shipped** |
 | gau | v2.2.4 | MIT | GREEN | container_cli | declared |
-| subfinder | v2.6.8 | MIT | GREEN | container_cli | declared |
-| dnsx | v1.2.1 | MIT | GREEN | container_cli | declared |
-| tlsx | v1.1.9 | MIT | GREEN | container_cli | declared |
-| gitleaks | v8.21.2 | MIT | GREEN | container_cli | declared |
+| subfinder | v2.6.8 | MIT | GREEN | container_cli | **adapter shipped** |
+| dnsx | v1.2.1 | MIT | GREEN | container_cli | **adapter shipped** |
+| tlsx | v1.1.9 | MIT | GREEN | container_cli | **adapter shipped** |
+| gitleaks | v8.21.2 | MIT | GREEN | container_cli | **adapter shipped** |
 | wappalyzergo | v0.2.0 | MIT | GREEN | container_cli | declared |
 | schemathesis | 4.28.0 | MIT | GREEN | container_cli | declared |
 | Stoplight Prism | 5.16.0 | Apache-2.0 | GREEN | container_cli | declared |
