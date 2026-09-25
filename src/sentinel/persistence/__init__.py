@@ -1,0 +1,1 @@
+"""Sentinel persistence subsystem."""
