@@ -8,6 +8,7 @@ which adapters are active, so tests and deployments can swap pieces cleanly.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -17,10 +18,8 @@ from sentinel.adapters.native.fingerprint import FingerprintAdapter
 from sentinel.adapters.native.headers import HeadersAdapter
 from sentinel.adapters.native.tls import TlsAdapter
 from sentinel.adapters.native.validator import ValidatorAdapter
-from sentinel.adapters.oss.ffuf import FfufAdapter
-from sentinel.adapters.oss.nuclei import NucleiAdapter
 from sentinel.domain import Target
-from sentinel.engines.adapter import SandboxRunner
+from sentinel.engines.adapter import EngineAdapter, SandboxRunner
 from sentinel.engines.registry import EngineRegistry
 from sentinel.engines.sandbox import select_runner
 from sentinel.governance.policy import LicensePolicy
@@ -77,6 +76,7 @@ class SentinelApp:
         sandbox: SandboxRunner | None = None,
         sandbox_mode: str = "auto",
         bind_oss: bool = True,
+        auto_detect: bool = False,
         validate_findings: bool = True,
     ) -> SentinelApp:
         from sentinel.persistence.repositories import Database
@@ -98,15 +98,28 @@ class SentinelApp:
             if eng is not None:
                 registry.bind_adapter(adapter.metadata().id, adapter)
 
-        # Bind isolated OSS adapters when their engine is usable.
+        # Isolated OSS adapters, keyed by engine id. Only GREEN, permissively
+        # licensed engines have a bundled adapter; RED/YELLOW engines require a
+        # recorded approval before they become usable regardless.
+        oss_adapters = _oss_adapter_factories(runner, registry)
+
+        # On a host/Kali deployment, detect which of these tools are actually
+        # installed and enable them so the planner can choose among them.
+        detected: set[str] = set()
+        if auto_detect:
+            detected = _detect_installed(list(oss_adapters))
+            for eid in detected:
+                registry.enable(eid, True)
+
         if bind_oss:
-            for eid, factory in (
-                ("nuclei", lambda: NucleiAdapter(runner, _ver(registry, "nuclei"))),
-                ("ffuf", lambda: FfufAdapter(runner, _ver(registry, "ffuf"))),
-            ):
+            for eid, factory in oss_adapters.items():
                 eng = registry.get(eid)
-                if eng is not None and eng.usable:
-                    registry.bind_adapter(eid, factory())
+                if eng is None or not eng.usable:
+                    continue
+                # If auto-detecting, only bind engines actually present on host.
+                if auto_detect and eid not in detected:
+                    continue
+                registry.bind_adapter(eid, factory())
 
         db = Database(database_url)
         orchestrator = Orchestrator(
@@ -121,3 +134,35 @@ class SentinelApp:
 def _ver(registry: EngineRegistry, engine_id: str) -> str:
     eng = registry.get(engine_id)
     return eng.metadata.version if eng else "unknown"
+
+
+def _oss_adapter_factories(
+    runner: SandboxRunner, registry: EngineRegistry
+) -> dict[str, Callable[[], EngineAdapter]]:
+    """Map engine id -> factory for every GREEN engine with a bundled adapter."""
+    from sentinel.adapters.oss.base import ContainerEngineAdapter
+    from sentinel.adapters.oss.feroxbuster import FeroxbusterAdapter
+    from sentinel.adapters.oss.ffuf import FfufAdapter
+    from sentinel.adapters.oss.httpx_engine import HttpxAdapter
+    from sentinel.adapters.oss.katana import KatanaAdapter
+    from sentinel.adapters.oss.nuclei import NucleiAdapter
+
+    def mk(cls: type[ContainerEngineAdapter], eid: str) -> Callable[[], EngineAdapter]:
+        return lambda: cls(runner, _ver(registry, eid))
+
+    return {
+        "nuclei": mk(NucleiAdapter, "nuclei"),
+        "ffuf": mk(FfufAdapter, "ffuf"),
+        "katana": mk(KatanaAdapter, "katana"),
+        "httpx": mk(HttpxAdapter, "httpx"),
+        "feroxbuster": mk(FeroxbusterAdapter, "feroxbuster"),
+    }
+
+
+def _detect_installed(engine_ids: list[str]) -> set[str]:
+    import asyncio
+
+    from sentinel.engines.detect import detect_engines
+
+    detections = asyncio.run(detect_engines(engine_ids))
+    return {d.engine_id for d in detections if d.installed}

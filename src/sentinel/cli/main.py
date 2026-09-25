@@ -273,7 +273,13 @@ def scan_run(
         typer.secho(f"Unknown profile: {profile}", fg=typer.colors.RED)
         raise typer.Exit(code=2) from None
 
-    sapp = SentinelApp.build(bind_oss=not no_oss, sandbox_mode=sandbox)
+    # In local (Kali/host) mode, auto-detect installed tools so the planner can
+    # decide which of the natively-installed engines to use per target.
+    sapp = SentinelApp.build(
+        bind_oss=not no_oss,
+        sandbox_mode=sandbox,
+        auto_detect=(sandbox.lower() == "local"),
+    )
     target = Target(
         tenant_id="cli",
         name=url[0],

@@ -227,3 +227,49 @@ async def test_detect_engines_reports_known_set() -> None:
     assert ids == {"nuclei", "ffuf"}
     # In this container the tools are absent; detection must not raise.
     assert all(d.installed in (True, False) for d in dets)
+
+
+async def test_katana_adapter_parses_endpoints() -> None:
+    from sentinel.adapters.oss.katana import KatanaAdapter
+
+    rec = json.dumps({"request": {"endpoint": "https://h.example.com/api/x", "method": "GET"}})
+    runner = FakeSandboxRunner(lambda spec: _sandbox_stdout(rec))
+    adapter = KatanaAdapter(runner, "v1.2.2")
+    req = _request("katana", [Capability.CRAWL_HTTP], "https://h.example.com/")
+    prepared = await adapter.prepare_target(req)
+    outcome = await adapter.execute_scan(prepared)
+    raw = await adapter.collect_results(outcome)
+    obs = adapter.normalize_results(raw, req)
+    assert len(obs) == 1
+    assert obs[0].location.path == "/api/x"
+
+
+async def test_httpx_adapter_parses_tech() -> None:
+    from sentinel.adapters.oss.httpx_engine import HttpxAdapter
+
+    rec = json.dumps({"url": "https://h.example.com/", "tech": ["nginx", "PHP"]})
+    runner = FakeSandboxRunner(lambda spec: _sandbox_stdout(rec))
+    adapter = HttpxAdapter(runner, "v1.6.9")
+    req = _request("httpx", [Capability.FINGERPRINT_TECH], "https://h.example.com/")
+    prepared = await adapter.prepare_target(req)
+    outcome = await adapter.execute_scan(prepared)
+    raw = await adapter.collect_results(outcome)
+    obs = adapter.normalize_results(raw, req)
+    techs = {e.data.get("technology") for o in obs for e in o.evidence}
+    assert techs == {"nginx", "PHP"}
+
+
+async def test_feroxbuster_adapter_parses_responses() -> None:
+    from sentinel.adapters.oss.feroxbuster import FeroxbusterAdapter
+
+    rec = json.dumps({"type": "response", "url": "https://h.example.com/secret", "status": 403})
+    runner = FakeSandboxRunner(lambda spec: _sandbox_stdout(rec))
+    adapter = FeroxbusterAdapter(runner, "v2.11.0")
+    req = _request("feroxbuster", [Capability.DISCOVERY_CONTENT], "https://h.example.com/")
+    prepared = await adapter.prepare_target(req)
+    outcome = await adapter.execute_scan(prepared)
+    raw = await adapter.collect_results(outcome)
+    obs = adapter.normalize_results(raw, req)
+    assert len(obs) == 1
+    assert obs[0].location.path == "/secret"
+    assert obs[0].severity is Severity.LOW

@@ -220,6 +220,15 @@ class EngineRegistry:
         eng = self._engines[engine_id]
         eng.adapter = adapter
 
+    def enable(self, engine_id: str, enabled: bool = True) -> None:
+        """Flip an engine's enabled flag (e.g. after detecting it on the host).
+
+        Only affects planner visibility; license/approval gating is unchanged, so
+        a RED/YELLOW engine stays unusable until separately approved.
+        """
+        eng = self._engines[engine_id]
+        eng.manifest = eng.manifest.model_copy(update={"enabled": enabled})
+
     def approve(self, engine_id: str, reference: str) -> None:
         """Record legal/compliance approval for a YELLOW/RED isolated engine."""
         eng = self._engines[engine_id]
