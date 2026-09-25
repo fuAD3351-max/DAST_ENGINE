@@ -1,0 +1,7 @@
+id: sentinel-fingerprint
+name: Sentinel Technology Fingerprint
+vendor: Sentinel DAST
+license: LicenseRef-Sentinel-Proprietary
+integration: native
+capabilities: [fingerprint.tech]
+adapter: sentinel.adapters.native.fingerprint:FingerprintAdapter

@@ -1,0 +1,35 @@
+# Sentinel engine lock file - pins every engine to an exact version and, for
+# containerized engines, an image digest. This provides reproducible scans and
+# a stable supply-chain surface. `latest` is never used.
+#
+# The image_digest values below are PLACEHOLDERS. Before any release, resolve
+# each pinned tag to its real digest with:
+#   docker buildx imagetools inspect <image>:<tag>
+# and record the digest here and in the manifest. `sentinel engine verify`
+# checks that every containerized engine is pinned by digest.
+engines:
+  nuclei:
+    version: v3.4.10
+    image_digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    license: MIT
+    verified_date: "2026-09-25"
+  ffuf:
+    version: v2.1.0
+    image_digest: "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+    license: MIT
+    verified_date: "2026-09-25"
+  sentinel-fingerprint:
+    version: "0.1.0"
+    license: LicenseRef-Sentinel-Proprietary
+  sentinel-headers:
+    version: "0.1.0"
+    license: LicenseRef-Sentinel-Proprietary
+  sentinel-tls:
+    version: "0.1.0"
+    license: LicenseRef-Sentinel-Proprietary
+  sentinel-crawler:
+    version: "0.1.0"
+    license: LicenseRef-Sentinel-Proprietary
+  sentinel-validator:
+    version: "0.1.0"
+    license: LicenseRef-Sentinel-Proprietary

@@ -1,0 +1,157 @@
+# Sentinel DAST third-party inventory (authoritative).
+#
+# Every third-party component Sentinel ships or depends on is listed here.
+# `sentinel license check` validates this file against
+# third_party/policy/license-policy.yaml and fails CI on any error.
+#
+# This file currently tracks the CONTROL-PLANE runtime dependencies (all
+# permissive) plus the build/dev toolchain. External security ENGINES (ZAP,
+# Nuclei, ffuf, ...) are added here as they are integrated, with their
+# integration_type set to container_cli/container_api so the arms-length rules
+# in the policy apply. See docs/assessment/ for the ecosystem assessment that
+# drives those decisions.
+
+version: 1
+components:
+  # ---- Control-plane runtime (in-process, permissive) ----------------------
+  - name: pydantic
+    version: ">=2.7,<3"
+    repository: https://github.com/pydantic/pydantic
+    license: MIT
+    copyright: "Copyright (c) Pydantic Services Inc. and individual contributors"
+    integration_type: library_static
+    dynamic_linking: false
+    static_linking: true
+    redistribution_allowed: true
+    commercial_risk: low
+    approval_status: approved
+    approval_reference: "GREEN/permissive-auto"
+    notes: "Data validation for the domain model and API."
+
+  - name: SQLAlchemy
+    version: ">=2.0,<2.1"
+    repository: https://github.com/sqlalchemy/sqlalchemy
+    license: MIT
+    copyright: "Copyright (c) SQLAlchemy authors and contributors"
+    integration_type: library_static
+    static_linking: true
+    commercial_risk: low
+    approval_status: approved
+    approval_reference: "GREEN/permissive-auto"
+    notes: "Persistence layer ORM/core."
+
+  - name: alembic
+    version: ">=1.13,<2"
+    repository: https://github.com/sqlalchemy/alembic
+    license: MIT
+    copyright: "Copyright (c) Mike Bayer and contributors"
+    integration_type: library_static
+    static_linking: true
+    commercial_risk: low
+    approval_status: approved
+    approval_reference: "GREEN/permissive-auto"
+    notes: "Database migrations."
+
+  - name: fastapi
+    version: ">=0.115,<1"
+    repository: https://github.com/fastapi/fastapi
+    license: MIT
+    copyright: "Copyright (c) Sebastian Ramirez"
+    integration_type: library_static
+    static_linking: true
+    commercial_risk: low
+    approval_status: approved
+    approval_reference: "GREEN/permissive-auto"
+    notes: "Control-plane REST API framework."
+
+  - name: starlette
+    version: ">=0.37"
+    repository: https://github.com/encode/starlette
+    license: BSD-3-Clause
+    copyright: "Copyright (c) Encode OSS Ltd."
+    integration_type: library_static
+    static_linking: true
+    commercial_risk: low
+    approval_status: approved
+    approval_reference: "GREEN/permissive-auto"
+    notes: "ASGI toolkit under FastAPI."
+
+  - name: uvicorn
+    version: ">=0.30,<1"
+    repository: https://github.com/encode/uvicorn
+    license: BSD-3-Clause
+    copyright: "Copyright (c) Encode OSS Ltd."
+    integration_type: library_dynamic
+    dynamic_linking: true
+    commercial_risk: low
+    approval_status: approved
+    approval_reference: "GREEN/permissive-auto"
+    notes: "ASGI server for the control plane."
+
+  - name: typer
+    version: ">=0.12,<1"
+    repository: https://github.com/fastapi/typer
+    license: MIT
+    copyright: "Copyright (c) Sebastian Ramirez"
+    integration_type: library_static
+    static_linking: true
+    commercial_risk: low
+    approval_status: approved
+    approval_reference: "GREEN/permissive-auto"
+    notes: "CLI framework."
+
+  - name: PyYAML
+    version: ">=6,<7"
+    repository: https://github.com/yaml/pyyaml
+    license: MIT
+    copyright: "Copyright (c) 2017-2021 Ingy dot Net, Kirill Simonov"
+    integration_type: library_static
+    static_linking: true
+    commercial_risk: low
+    approval_status: approved
+    approval_reference: "GREEN/permissive-auto"
+    notes: "Config, policy, inventory and engine-manifest parsing."
+
+  - name: httpx
+    version: ">=0.27,<1"
+    repository: https://github.com/encode/httpx
+    license: BSD-3-Clause
+    copyright: "Copyright (c) Encode OSS Ltd."
+    integration_type: library_static
+    static_linking: true
+    commercial_risk: low
+    approval_status: approved
+    approval_reference: "GREEN/permissive-auto"
+    notes: "Proprietary HTTP probing, native detectors and validation."
+
+  # ---- Build / dev toolchain (not redistributed in the product) ------------
+  - name: pytest
+    version: ">=8"
+    repository: https://github.com/pytest-dev/pytest
+    license: MIT
+    integration_type: build_only
+    redistribution_allowed: true
+    commercial_risk: low
+    approval_status: approved
+    approval_reference: "GREEN/build-only"
+    notes: "Test runner; not shipped."
+
+  - name: ruff
+    version: ">=0.6"
+    repository: https://github.com/astral-sh/ruff
+    license: MIT
+    integration_type: build_only
+    commercial_risk: low
+    approval_status: approved
+    approval_reference: "GREEN/build-only"
+    notes: "Linter/formatter; not shipped."
+
+  - name: mypy
+    version: ">=1.10"
+    repository: https://github.com/python/mypy
+    license: MIT
+    integration_type: build_only
+    commercial_risk: low
+    approval_status: approved
+    approval_reference: "GREEN/build-only"
+    notes: "Static type checker; not shipped."

@@ -1,0 +1,13 @@
+id: ffuf
+name: ffuf
+vendor: joohoi
+homepage: https://github.com/ffuf/ffuf
+license: MIT
+integration: container_cli
+capabilities: [discovery.content]
+adapter: sentinel.adapters.oss.ffuf:FfufAdapter
+image: ghcr.io/ffuf/ffuf:v2.1.0@sha256:1111111111111111111111111111111111111111111111111111111111111111
+default_limits:
+  cpus: 1.0
+  memory_mb: 512
+  timeout_seconds: 1800

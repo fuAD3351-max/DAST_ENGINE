@@ -1,0 +1,7 @@
+id: sentinel-tls
+name: Sentinel TLS Analyzer
+vendor: Sentinel DAST
+license: LicenseRef-Sentinel-Proprietary
+integration: native
+capabilities: [analysis.tls]
+adapter: sentinel.adapters.native.tls:TlsAdapter

@@ -1,0 +1,7 @@
+id: sentinel-headers
+name: Sentinel Security Headers Analyzer
+vendor: Sentinel DAST
+license: LicenseRef-Sentinel-Proprietary
+integration: native
+capabilities: [analysis.headers, analysis.secrets, audit.passive]
+adapter: sentinel.adapters.native.headers:HeadersAdapter

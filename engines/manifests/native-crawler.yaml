@@ -1,0 +1,7 @@
+id: sentinel-crawler
+name: Sentinel HTTP Crawler
+vendor: Sentinel DAST
+license: LicenseRef-Sentinel-Proprietary
+integration: native
+capabilities: [crawl.http, discovery.js]
+adapter: sentinel.adapters.native.crawler:CrawlerAdapter
