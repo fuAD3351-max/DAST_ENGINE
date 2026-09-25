@@ -27,8 +27,11 @@ class Capability(StrEnum):
     DISCOVERY_CONTENT = "discovery.content"
     DISCOVERY_JS = "discovery.js"
     DISCOVERY_API_SPEC = "discovery.api_spec"
+    DISCOVERY_SUBDOMAIN = "discovery.subdomain"
+    RECON_HTTP = "recon.http"  # live-host probing / HTTP intelligence over the attack surface
     FINGERPRINT_TECH = "fingerprint.tech"
     ANALYSIS_TLS = "analysis.tls"
+    ANALYSIS_DNS = "analysis.dns"
     ANALYSIS_HEADERS = "analysis.headers"
     ANALYSIS_SECRETS = "analysis.secrets"
     AUDIT_PASSIVE = "audit.passive"
@@ -36,6 +39,7 @@ class Capability(StrEnum):
     AUDIT_TEMPLATES = "audit.templates"
     AUDIT_API_REST = "audit.api.rest"
     AUDIT_API_GRAPHQL = "audit.api.graphql"
+    AUDIT_API_SOAP = "audit.api.soap"
     AUDIT_WEBSOCKET = "audit.websocket"
     AUDIT_AUTHZ = "audit.authz"
     OOB_CALLBACK = "oob.callback"
@@ -47,6 +51,8 @@ class IntegrationType(StrEnum):
     LIBRARY = "library"  # permissively licensed library, in-process
     CONTAINER_CLI = "container_cli"  # unmodified external program in an isolated container
     CONTAINER_API = "container_api"  # external daemon in a container, driven over its API
+    EXTERNAL_SERVICE = "external_service"  # third-party service the CUSTOMER hosts and licenses;
+    # Sentinel ships only an API client, never the third-party software (bring-your-own-license)
 
 
 class NetworkMode(StrEnum):

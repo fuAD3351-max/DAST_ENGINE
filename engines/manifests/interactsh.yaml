@@ -1,0 +1,12 @@
+# Self-hostable OOB interaction server for air-gapped deployments.
+id: interactsh
+name: interactsh
+vendor: ProjectDiscovery
+homepage: https://github.com/projectdiscovery/interactsh
+license: MIT
+integration: container_api
+capabilities:
+- oob.callback
+adapter: sentinel.adapters.oss.interactsh:InteractshAdapter
+enabled: false
+image: ghcr.io/projectdiscovery/interactsh-server:v1.2.4@sha256:d38087bdd7039062d5da7f52d3bf1c069f82a28c86b7584727b6825a883c2b11

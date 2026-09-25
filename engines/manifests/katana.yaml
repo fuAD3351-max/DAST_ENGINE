@@ -1,0 +1,14 @@
+# Fast crawler with headless mode.
+id: katana
+name: Katana
+vendor: ProjectDiscovery
+homepage: https://github.com/projectdiscovery/katana
+license: MIT
+integration: container_cli
+capabilities:
+- crawl.http
+- crawl.browser
+- discovery.js
+adapter: sentinel.adapters.oss.katana:KatanaAdapter
+enabled: false
+image: ghcr.io/projectdiscovery/katana:v1.2.2@sha256:e181b3dfcbf4b938b8254b8383c8fc0e4f1e812f6053e09abedf8034732e113c

@@ -1,0 +1,12 @@
+# GPL: coverage overlaps ZAP + Nuclei (both permissive).
+id: wapiti
+name: Wapiti
+vendor: Wapiti
+homepage: https://github.com/wapiti-scanner/wapiti
+license: GPL-2.0-only
+integration: container_cli
+capabilities:
+- audit.active
+adapter: sentinel.adapters.oss.wapiti:WapitiAdapter
+enabled: false
+image: docker.io/sentinel/wapiti:3.3.2@sha256:561f2d42ea28b8e600dcd1fe3fb9ace2739907331487f00fdba6196806606c42

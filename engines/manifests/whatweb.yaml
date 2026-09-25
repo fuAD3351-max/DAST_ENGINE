@@ -1,0 +1,12 @@
+# GPL: prefer native fingerprint + wappalyzergo (MIT).
+id: whatweb
+name: WhatWeb
+vendor: urbanadventurer
+homepage: https://github.com/urbanadventurer/WhatWeb
+license: GPL-2.0-only
+integration: container_cli
+capabilities:
+- fingerprint.tech
+adapter: sentinel.adapters.oss.whatweb:WhatWebAdapter
+enabled: false
+image: docker.io/sentinel/whatweb:0.5.5@sha256:d7fd04a1ad9ef4508f76b36e2036964934a515bea9132cb25ccbb28ea4cd71bb

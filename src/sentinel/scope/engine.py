@@ -101,9 +101,23 @@ def _rule_allows_private(rule: ScopeRule) -> bool:
 
 class ScopeEngine:
     def __init__(self, target: Target) -> None:
-        self._target = target
         self._rules = list(target.scope_rules)
+        self._authorized = target.is_authorized()
         self._private_optin = any(_rule_allows_private(r) for r in self._rules)
+
+    @classmethod
+    def from_rules(cls, rules: list[ScopeRule], *, authorized: bool = True) -> ScopeEngine:
+        """Build directly from rules, e.g. from an EngineRunRequest.
+
+        ``authorized`` should reflect that the orchestrator already verified the
+        target's authorization before dispatching the engine; scope checks then
+        only enforce the include/exclude/private-address rules.
+        """
+        obj = cls.__new__(cls)
+        obj._rules = list(rules)
+        obj._authorized = authorized
+        obj._private_optin = any(_rule_allows_private(r) for r in rules)
+        return obj
 
     def _rule_matches(self, rule: ScopeRule, u: _ParsedUrl) -> bool:
         if u.scheme not in rule.schemes:
@@ -124,7 +138,7 @@ class ScopeEngine:
         )
 
     def check(self, url: str, method: str | None = None) -> ScopeDecision:
-        if not self._target.is_authorized():
+        if not self._authorized:
             return ScopeDecision(False, "target has no valid authorization record")
 
         u = _parse(url, method)

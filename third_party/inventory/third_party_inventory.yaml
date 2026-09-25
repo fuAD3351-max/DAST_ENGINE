@@ -124,6 +124,51 @@ components:
     approval_reference: "GREEN/permissive-auto"
     notes: "Proprietary HTTP probing, native detectors and validation."
 
+  - name: cryptography
+    version: ">=42"
+    repository: https://github.com/pyca/cryptography
+    license: Apache-2.0 OR BSD-3-Clause
+    copyright: "Copyright (c) Individual and corporate contributors (PyCA)"
+    integration_type: library_static
+    static_linking: true
+    commercial_risk: low
+    approval_status: approved
+    approval_reference: "GREEN/permissive-auto"
+    notes: "X.509 certificate parsing for the native TLS analyzer (bundles OpenSSL under Apache/BSD-compatible terms; ships as wheels)."
+
+  # ---- Isolated open-source ENGINE images (arms-length container_cli) -------
+  # Only engines Sentinel actually ships/pulls by default are tracked here.
+  # Additional engines are DECLARED in engines/manifests (governed by the
+  # license policy) but disabled until an adapter is bound and, for RED/YELLOW
+  # licenses, a legal review is recorded. See docs/assessment/.
+  - name: nuclei
+    version: v3.4.10
+    repository: https://github.com/projectdiscovery/nuclei
+    license: MIT
+    copyright: "Copyright (c) ProjectDiscovery, Inc."
+    integration_type: container_cli
+    containerized: true
+    modification_required: false
+    network_service: false
+    redistribution_allowed: true
+    commercial_risk: low
+    approval_status: approved
+    approval_reference: "GREEN/isolated-container"
+    notes: "Template-based checks; unmodified upstream image, run in the sandbox."
+
+  - name: ffuf
+    version: v2.1.0
+    repository: https://github.com/ffuf/ffuf
+    license: MIT
+    copyright: "Copyright (c) Joona Hoikkala"
+    integration_type: container_cli
+    containerized: true
+    redistribution_allowed: true
+    commercial_risk: low
+    approval_status: approved
+    approval_reference: "GREEN/isolated-container"
+    notes: "Content discovery; unmodified upstream image, run in the sandbox."
+
   # ---- Build / dev toolchain (not redistributed in the product) ------------
   - name: pytest
     version: ">=8"

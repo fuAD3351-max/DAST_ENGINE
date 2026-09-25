@@ -85,6 +85,7 @@ _KIND_CAPS: dict[ApplicationKind, set[Capability]] = {
     },
     ApplicationKind.SOAP_API: {
         Capability.DISCOVERY_API_SPEC,
+        Capability.AUDIT_API_SOAP,
         Capability.AUDIT_API_REST,
     },
     ApplicationKind.WEBSOCKET: {
@@ -105,6 +106,9 @@ _UNIVERSAL_CAPS = {
 
 _CAP_STAGE: dict[Capability, StageKind] = {
     Capability.FINGERPRINT_TECH: StageKind.FINGERPRINT,
+    Capability.DISCOVERY_SUBDOMAIN: StageKind.FINGERPRINT,
+    Capability.RECON_HTTP: StageKind.FINGERPRINT,
+    Capability.ANALYSIS_DNS: StageKind.FINGERPRINT,
     Capability.CRAWL_HTTP: StageKind.DISCOVERY,
     Capability.CRAWL_BROWSER: StageKind.DISCOVERY,
     Capability.DISCOVERY_CONTENT: StageKind.DISCOVERY,
@@ -118,6 +122,7 @@ _CAP_STAGE: dict[Capability, StageKind] = {
     Capability.AUDIT_TEMPLATES: StageKind.AUDIT,
     Capability.AUDIT_API_REST: StageKind.AUDIT,
     Capability.AUDIT_API_GRAPHQL: StageKind.AUDIT,
+    Capability.AUDIT_API_SOAP: StageKind.AUDIT,
     Capability.AUDIT_WEBSOCKET: StageKind.AUDIT,
     Capability.AUDIT_AUTHZ: StageKind.AUDIT,
     Capability.OOB_CALLBACK: StageKind.AUDIT,

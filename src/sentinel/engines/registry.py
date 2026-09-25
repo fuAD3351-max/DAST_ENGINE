@@ -65,7 +65,8 @@ class RegisteredEngine:
     lock: EngineLockEntry
     metadata: EngineMetadata
     adapter: EngineAdapter | None = None
-    problems: list[str] = field(default_factory=list)
+    problems: list[str] = field(default_factory=list)  # blocking issues
+    notes: list[str] = field(default_factory=list)  # informational (non-blocking)
 
     @property
     def usable(self) -> bool:
@@ -121,6 +122,42 @@ class EngineRegistry:
             )
             self._engines[manifest.id] = RegisteredEngine(
                 manifest=manifest, lock=lock_entry, metadata=metadata, problems=problems
+            )
+            return
+
+        # EXTERNAL_SERVICE engines (e.g. a customer-hosted Burp Suite) are never
+        # redistributed by Sentinel - we ship only the API client. The customer
+        # supplies and licenses the third-party software separately, so the
+        # third-party redistribution policy does not gate our build. Such engines
+        # are approved for distribution but carry a bring-your-own-license note
+        # and stay disabled until the operator configures the connection.
+        if manifest.integration is IntegrationType.EXTERNAL_SERVICE:
+            if lock_entry is None:
+                lock_entry = EngineLockEntry(version=manifest.name, license=manifest.license)
+            notes = [
+                "bring-your-own-license: requires a customer-provided, separately licensed "
+                f"'{manifest.vendor}' instance; Sentinel distributes only the API client"
+            ]
+            decision = self._policy.classify(manifest.license)
+            metadata = EngineMetadata(
+                id=manifest.id,
+                name=manifest.name,
+                version=lock_entry.version,
+                vendor=manifest.vendor,
+                license_spdx=manifest.license,
+                license_class=decision.license_class,
+                approval_status=ApprovalStatus.APPROVED,
+                integration=manifest.integration,
+                capabilities=manifest.capabilities,
+                image=None,
+                homepage=manifest.homepage or None,
+            )
+            self._engines[manifest.id] = RegisteredEngine(
+                manifest=manifest,
+                lock=lock_entry,
+                metadata=metadata,
+                problems=problems,
+                notes=notes,
             )
             return
 

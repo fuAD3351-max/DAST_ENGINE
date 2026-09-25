@@ -83,6 +83,12 @@ classes:
       - CC-BY-NC-SA-4.0
       - Prosperity-3.0.0
       - PolyForm-Noncommercial-1.0.0
+      # Proprietary commercial licenses. These can NEVER be embedded or
+      # redistributed by Sentinel. They are permitted only via an
+      # EXTERNAL_SERVICE integration, where the customer hosts and licenses the
+      # software themselves and Sentinel ships only an API client.
+      - LicenseRef-Commercial
+      - LicenseRef-PortSwigger-Commercial
 
 # Any SPDX id not listed above is treated as UNKNOWN -> blocks the build and
 # routes to review. Custom / non-SPDX strings must be added explicitly.
