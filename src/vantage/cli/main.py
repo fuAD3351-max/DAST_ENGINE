@@ -144,7 +144,11 @@ def engine_list(
             f"{e.usable!s:6} {e.metadata.integration.value}",
             fg=colour,
         )
-    typer.echo(f"\n{len(engines)} engines; {len(reg.enabled_engines())} usable.")
+    usable = sum(1 for e in engines if e.usable)
+    typer.echo(
+        f"\n{len(engines)} engines; {usable} policy-usable "
+        "(bind an adapter / install the binary to run them)."
+    )
 
 
 @engine_app.command("detect")
